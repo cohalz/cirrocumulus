@@ -1,1 +1,7 @@
 package-lock.json
+!jest.config.js
+node_modules/
+dist
+*.js
+*.d.ts
+*.tgz
