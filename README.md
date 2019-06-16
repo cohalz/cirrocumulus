@@ -1,8 +1,14 @@
 # Cirrocumulus
 
-##
-- userdata configuration including ecs.config
-- 
+![Build Status](https://travis-ci.org/cohalz/cirrocumulus.png?branch=master)
+
+## Libraries
+### Ec2Cluster
+- A ECS cluster configuration such as userdata
+### DeployFiles
+- Deploy local files to all instances of the ECS cluster
+### ScalingPlan
+- CPU-based auto-scaling configuration using AWS Auto Scaling
 
 ## Synopsis
 
