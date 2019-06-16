@@ -25,7 +25,6 @@
     "prepack": "run-s clean build",
     "prepublish": "run-s clean build"
   },
-  "private": true,
   "devDependencies": {
     "@aws-cdk/assert": "^0.34.0",
     "@aws-cdk/aws-autoscalingplans": "^0.34.0",
