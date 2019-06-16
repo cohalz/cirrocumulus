@@ -9,10 +9,6 @@ class Ec2Cluster extends cdk_1.Construct {
     constructor(scope, id, props) {
         super(scope, id);
         this.createAutoScalingGroup = (scope, clusterName, vpc, props) => {
-            this.spot =
-                props.onDemandPercentage && props.onDemandPercentage != 100
-                    ? true
-                    : false;
             if (this.spot) {
                 if (props.instanceTypes.length <= 1)
                     throw new Error("When using spot instances, please set multiple instance types.");
@@ -142,7 +138,14 @@ class Ec2Cluster extends cdk_1.Construct {
             clusterName: props.name,
             vpc: props.vpc,
         });
+        this.spot =
+            props.onDemandPercentage && props.onDemandPercentage != 100
+                ? true
+                : false;
         const asg = this.createAutoScalingGroup(scope, this.cluster.clusterName, props.vpc, props);
+        const cfnAsg = asg.node.findChild("ASG");
+        this.autoScalingGroupName = cfnAsg.autoScalingGroupName;
+        this.instanceRole = asg.node.findChild("InstanceRole");
         this.cluster.addAutoScalingGroup(asg);
     }
 }

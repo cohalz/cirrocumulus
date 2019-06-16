@@ -79,17 +79,23 @@ export class Ec2Cluster extends Construct {
       vpc: props.vpc,
     })
 
-    const asg = this.createAutoScalingGroup(scope, this.cluster.clusterName, props.vpc, props)
-    this.cluster.addAutoScalingGroup(asg)
-  }
-
-  private createAutoScalingGroup = (scope: Construct, clusterName: string, vpc: IVpc, props: ClusterProps) => {
-
     this.spot =
       props.onDemandPercentage && props.onDemandPercentage != 100
         ? true
         : false
 
+    const asg = this.createAutoScalingGroup(scope, this.cluster.clusterName, props.vpc, props)
+
+    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
+
+    this.autoScalingGroupName = cfnAsg.autoScalingGroupName
+
+    this.instanceRole = asg.node.findChild("InstanceRole") as Role
+
+    this.cluster.addAutoScalingGroup(asg)
+  }
+
+  private createAutoScalingGroup = (scope: Construct, clusterName: string, vpc: IVpc, props: ClusterProps) => {
     if (this.spot) {
       if (props.instanceTypes.length <= 1) throw new Error("When using spot instances, please set multiple instance types.")
     } else {
