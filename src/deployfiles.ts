@@ -72,8 +72,7 @@ export class DeployFiles extends Construct {
   private createBucketToDeploy(
     scope: Construct,
     instanceRole: Role,
-    localDir: string,
-    s3prefix?: string
+    localDir: string
   ) {
     const bucket = new Bucket(scope, "BucketToDeploy", {
       blockPublicAccess: BlockPublicAccess.BlockAll,
@@ -88,7 +87,7 @@ export class DeployFiles extends Construct {
     const absolutePath = path.join(process.cwd(), localDir)
     const bucketDeployment = new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: bucket,
-      destinationKeyPrefix: s3prefix,
+      destinationKeyPrefix: localDir,
       source: Source.asset(absolutePath),
     })
 

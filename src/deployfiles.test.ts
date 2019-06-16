@@ -13,7 +13,7 @@ describe("deployfiles", () => {
 
     const deployFiles = new DeployFiles(stack, "DeployFiles", {
       instanceRole,
-      source: "examples",
+      source: "examples/",
       targets: [
         {
           key: "aws:cloudformation:stack-name",
