@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`scalingplan can set a targetPercentage 1`] = `
+Object {
+  "Resources": Object {
+    "AutoScalingPlan": Object {
+      "Properties": Object {
+        "ApplicationSource": Object {
+          "TagFilters": Array [
+            Object {
+              "Key": "aws:cloudformation:stack-name",
+              "Values": Array [
+                "Stack",
+              ],
+            },
+          ],
+        },
+        "ScalingInstructions": Array [
+          Object {
+            "MaxCapacity": 1,
+            "MinCapacity": 1,
+            "ResourceId": "autoScalingGroup/my-asg",
+            "ScalableDimension": "autoscaling:autoScalingGroup:DesiredCapacity",
+            "ScalingPolicyUpdateBehavior": "ReplaceExternalPolicies",
+            "ServiceNamespace": "autoscaling",
+            "TargetTrackingConfigurations": Array [
+              Object {
+                "EstimatedInstanceWarmup": 300,
+                "PredefinedScalingMetricSpecification": Object {
+                  "PredefinedScalingMetricType": "ASGAverageCPUUtilization",
+                },
+                "TargetValue": 60,
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::AutoScalingPlans::ScalingPlan",
+    },
+  },
+}
+`;
+
+exports[`scalingplan can set capacities 1`] = `
+Object {
+  "Resources": Object {
+    "AutoScalingPlan": Object {
+      "Properties": Object {
+        "ApplicationSource": Object {
+          "TagFilters": Array [
+            Object {
+              "Key": "aws:cloudformation:stack-name",
+              "Values": Array [
+                "Stack",
+              ],
+            },
+          ],
+        },
+        "ScalingInstructions": Array [
+          Object {
+            "MaxCapacity": 4,
+            "MinCapacity": 2,
+            "ResourceId": "autoScalingGroup/my-asg",
+            "ScalableDimension": "autoscaling:autoScalingGroup:DesiredCapacity",
+            "ScalingPolicyUpdateBehavior": "ReplaceExternalPolicies",
+            "ServiceNamespace": "autoscaling",
+            "TargetTrackingConfigurations": Array [
+              Object {
+                "EstimatedInstanceWarmup": 300,
+                "PredefinedScalingMetricSpecification": Object {
+                  "PredefinedScalingMetricType": "ASGAverageCPUUtilization",
+                },
+                "TargetValue": 50,
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::AutoScalingPlans::ScalingPlan",
+    },
+  },
+}
+`;
+
+exports[`scalingplan default 1`] = `
+Object {
+  "Resources": Object {
+    "AutoScalingPlan": Object {
+      "Properties": Object {
+        "ApplicationSource": Object {
+          "TagFilters": Array [
+            Object {
+              "Key": "aws:cloudformation:stack-name",
+              "Values": Array [
+                "Stack",
+              ],
+            },
+          ],
+        },
+        "ScalingInstructions": Array [
+          Object {
+            "MaxCapacity": 1,
+            "MinCapacity": 1,
+            "ResourceId": "autoScalingGroup/my-asg",
+            "ScalableDimension": "autoscaling:autoScalingGroup:DesiredCapacity",
+            "ScalingPolicyUpdateBehavior": "ReplaceExternalPolicies",
+            "ServiceNamespace": "autoscaling",
+            "TargetTrackingConfigurations": Array [
+              Object {
+                "EstimatedInstanceWarmup": 300,
+                "PredefinedScalingMetricSpecification": Object {
+                  "PredefinedScalingMetricType": "ASGAverageCPUUtilization",
+                },
+                "TargetValue": 50,
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::AutoScalingPlans::ScalingPlan",
+    },
+  },
+}
+`;

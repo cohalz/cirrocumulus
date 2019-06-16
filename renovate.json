@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "automerge": true,
+  "packageRules": [
+    {
+      "groupName": "aws cdk",
+      "packageNames": [
+        "aws-cdk"
+      ],
+      "packagePatterns": [
+        "^@aws-cdk/"
+      ]
+    }
+  ]
+}
