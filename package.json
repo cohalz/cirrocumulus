@@ -1,6 +1,6 @@
 {
   "name": "@cohalz/cirrocumulus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "repository": {
@@ -27,12 +27,6 @@
   },
   "devDependencies": {
     "@aws-cdk/assert": "0.34.0",
-    "@aws-cdk/aws-autoscalingplans": "0.34.0",
-    "@aws-cdk/aws-cloudtrail": "0.34.0",
-    "@aws-cdk/aws-codebuild": "0.34.0",
-    "@aws-cdk/aws-ecs": "0.34.0",
-    "@aws-cdk/aws-s3-deployment": "0.34.0",
-    "@aws-cdk/aws-ssm": "0.34.0",
     "@aws-cdk/cdk": "0.34.0",
     "aws-cdk": "0.34.0",
     "@types/jest": "24.0.14",
@@ -46,14 +40,15 @@
     "tslint-plugin-prettier": "2.0.1",
     "typescript": "3.5.2"
   },
+  "dependencies": {
+    "@aws-cdk/aws-autoscalingplans": "0.34.0",
+    "@aws-cdk/aws-cloudtrail": "0.34.0",
+    "@aws-cdk/aws-ecs": "0.34.0",
+    "@aws-cdk/aws-s3-deployment": "0.34.0",
+    "@aws-cdk/aws-ssm": "0.34.0"
+  },
   "peerDependencies": {
-    "@aws-cdk/assert": "^0.34.0",
-    "@aws-cdk/aws-autoscalingplans": "^0.34.0",
-    "@aws-cdk/aws-cloudtrail": "^0.34.0",
-    "@aws-cdk/aws-codebuild": "^0.34.0",
-    "@aws-cdk/aws-ecs": "^0.34.0",
-    "@aws-cdk/aws-s3-deployment": "^0.34.0",
-    "@aws-cdk/aws-ssm": "^0.34.0",
+    "@aws-cdk/aws-ec2": "^0.34.0",
     "@aws-cdk/cdk": "^0.34.0"
   }
 }
