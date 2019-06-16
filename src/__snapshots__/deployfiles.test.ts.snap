@@ -48,6 +48,7 @@ Object {
     },
     "BucketDeploymentCustomResourceCB7E2133": Object {
       "Properties": Object {
+        "DestinationBucketKeyPrefix": "examples/",
         "DestinationBucketName": Object {
           "Ref": "BucketToDeploy91F87F54",
         },
@@ -442,11 +443,11 @@ Object {
                         Object {
                           "Ref": "BucketToDeploy91F87F54",
                         },
-                        "/examples ",
+                        "/examples/ ",
                         Object {
                           "Ref": "BucketToDeploy91F87F54",
                         },
-                        "/examples",
+                        "/examples/",
                       ],
                     ],
                   },
@@ -458,7 +459,7 @@ Object {
                         Object {
                           "Ref": "BucketToDeploy91F87F54",
                         },
-                        "/examples",
+                        "/examples/",
                       ],
                     ],
                   },
