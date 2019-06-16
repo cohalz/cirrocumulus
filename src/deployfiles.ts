@@ -97,7 +97,7 @@ export class DeployFiles extends Construct {
 
   private createDocumentToDeploy(scope: Construct, s3Path: string) {
     const commands = [
-      "set -e",
+      "set -eux",
       `aws --region ${Aws.region} s3 sync --delete --exact-timestamps s3://${s3Path} ${s3Path}`,
       `cd ${s3Path}`,
       "chmod -R +x bin/",
