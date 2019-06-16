@@ -3,7 +3,6 @@ import { Construct } from "@aws-cdk/cdk"
 import { CfnScalingPlan } from "@aws-cdk/aws-autoscalingplans"
 
 export interface ScalingPlanProps {
-
   /**
    * Rhe name of the Auto Scaling group
    *
@@ -39,32 +38,35 @@ export interface ScalingPlanProps {
 }
 
 export class ScalingPlan extends Construct {
-
   constructor(scope: Construct, id: string, props: ScalingPlanProps) {
     super(scope, id)
 
     const minCapacity = props.minCapacity ? props.minCapacity! : 1
     const maxCapacity = props.maxCapacity ? props.maxCapacity! : minCapacity
 
-    new CfnScalingPlan(scope, 'AutoScalingPlan', {
+    const scalingPlan = new CfnScalingPlan(scope, "Resource", {
       applicationSource: {
-        tagFilters: props.tagFilters
+        tagFilters: props.tagFilters,
       },
-      scalingInstructions: [{
-        minCapacity,
-        maxCapacity,
-        resourceId: `autoScalingGroup/${props.autoScalingGroupName}`,
-        scalableDimension: "autoscaling:autoScalingGroup:DesiredCapacity",
-        scalingPolicyUpdateBehavior: "ReplaceExternalPolicies",
-        serviceNamespace: "autoscaling",
-        targetTrackingConfigurations: [{
-          predefinedScalingMetricSpecification: {
-            predefinedScalingMetricType: "ASGAverageCPUUtilization"
-          },
-          estimatedInstanceWarmup: 300,
-          targetValue: props.targetPercentage ? props.targetPercentage : 50
-        }]
-      }]
+      scalingInstructions: [
+        {
+          maxCapacity,
+          minCapacity,
+          resourceId: `autoScalingGroup/${props.autoScalingGroupName}`,
+          scalableDimension: "autoscaling:autoScalingGroup:DesiredCapacity",
+          scalingPolicyUpdateBehavior: "ReplaceExternalPolicies",
+          serviceNamespace: "autoscaling",
+          targetTrackingConfigurations: [
+            {
+              estimatedInstanceWarmup: 300,
+              predefinedScalingMetricSpecification: {
+                predefinedScalingMetricType: "ASGAverageCPUUtilization",
+              },
+              targetValue: props.targetPercentage ? props.targetPercentage : 50,
+            },
+          ],
+        },
+      ],
     })
   }
 }

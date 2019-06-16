@@ -6,12 +6,14 @@ describe("scalingplan", () => {
   test("default", () => {
     const stack = new Stack()
 
-    new ScalingPlan(stack, "ScalingPlan", {
+    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
       autoScalingGroupName: "my-asg",
-      tagFilters: [{
-        key: "aws:cloudformation:stack-name",
-        values: [stack.name]
-      }]
+      tagFilters: [
+        {
+          key: "aws:cloudformation:stack-name",
+          values: [stack.name],
+        },
+      ],
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -20,14 +22,16 @@ describe("scalingplan", () => {
   test("can set capacities", () => {
     const stack = new Stack()
 
-    new ScalingPlan(stack, "ScalingPlan", {
+    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
       autoScalingGroupName: "my-asg",
-      minCapacity: 2,
       maxCapacity: 4,
-      tagFilters: [{
-        key: "aws:cloudformation:stack-name",
-        values: [stack.name]
-      }]
+      minCapacity: 2,
+      tagFilters: [
+        {
+          key: "aws:cloudformation:stack-name",
+          values: [stack.name],
+        },
+      ],
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -36,13 +40,15 @@ describe("scalingplan", () => {
   test("can set a targetPercentage", () => {
     const stack = new Stack()
 
-    new ScalingPlan(stack, "ScalingPlan", {
+    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
       autoScalingGroupName: "my-asg",
+      tagFilters: [
+        {
+          key: "aws:cloudformation:stack-name",
+          values: [stack.name],
+        },
+      ],
       targetPercentage: 60,
-      tagFilters: [{
-        key: "aws:cloudformation:stack-name",
-        values: [stack.name]
-      }]
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()

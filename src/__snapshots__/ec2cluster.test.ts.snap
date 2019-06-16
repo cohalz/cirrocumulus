@@ -2665,12 +2665,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                   },
                 },
                 Object {
-                  "Key": "Service",
-                  "Value": "example",
-                },
-                Object {
                   "Key": "Env",
                   "Value": "develop",
+                },
+                Object {
+                  "Key": "Service",
+                  "Value": "example",
                 },
                 Object {
                   "Key": "roles",
@@ -2688,12 +2688,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                   },
                 },
                 Object {
-                  "Key": "Service",
-                  "Value": "example",
-                },
-                Object {
                   "Key": "Env",
                   "Value": "develop",
+                },
+                Object {
+                  "Key": "Service",
+                  "Value": "example",
                 },
                 Object {
                   "Key": "roles",

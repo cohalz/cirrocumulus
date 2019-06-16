@@ -3,7 +3,7 @@
 exports[`scalingplan can set a targetPercentage 1`] = `
 Object {
   "Resources": Object {
-    "AutoScalingPlan": Object {
+    "Resource": Object {
       "Properties": Object {
         "ApplicationSource": Object {
           "TagFilters": Array [
@@ -44,7 +44,7 @@ Object {
 exports[`scalingplan can set capacities 1`] = `
 Object {
   "Resources": Object {
-    "AutoScalingPlan": Object {
+    "Resource": Object {
       "Properties": Object {
         "ApplicationSource": Object {
           "TagFilters": Array [
@@ -85,7 +85,7 @@ Object {
 exports[`scalingplan default 1`] = `
 Object {
   "Resources": Object {
-    "AutoScalingPlan": Object {
+    "Resource": Object {
       "Properties": Object {
         "ApplicationSource": Object {
           "TagFilters": Array [

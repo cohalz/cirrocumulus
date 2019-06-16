@@ -1,16 +1,17 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import { Stack } from "@aws-cdk/cdk"
-import { Ec2Cluster } from "./ec2cluster"
 import { Vpc } from "@aws-cdk/aws-ec2"
+import { Stack } from "@aws-cdk/cdk"
+
+import { Ec2Cluster } from "./ec2cluster"
 
 describe("ec2cluster", () => {
   test("default", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
 
-    new Ec2Cluster(stack, "Ec2Cluster", {
-      vpc,
+    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       instanceTypes: ["t3.medium"],
+      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -20,10 +21,10 @@ describe("ec2cluster", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
 
-    new Ec2Cluster(stack, "Ec2Cluster", {
-      vpc,
+    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       instanceTypes: ["t3.medium", "t2.medium"],
       onDemandPercentage: 20,
+      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -33,10 +34,10 @@ describe("ec2cluster", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
 
-    new Ec2Cluster(stack, "Ec2Cluster", {
-      vpc,
-      instanceTypes: ["t3.medium"],
+    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       extraUserData: ["echo 1"],
+      instanceTypes: ["t3.medium"],
+      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -46,14 +47,14 @@ describe("ec2cluster", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
 
-    new Ec2Cluster(stack, "Ec2Cluster", {
-      vpc,
+    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       instanceTypes: ["t3.medium"],
       tags: {
-        Service: "example",
         Env: "develop",
-        roles: "develop:personal,misc:misc"
+        Service: "example",
+        roles: "develop:personal,misc:misc",
       },
+      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -64,12 +65,16 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     expect(() => {
-      new Ec2Cluster(stack, "Ec2Cluster", {
-        vpc,
+      const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
         instanceTypes: ["t3.medium"],
         onDemandPercentage: 20,
+        vpc,
       })
-    }).toThrow(new Error("When using spot instances, please set multiple instance types."))
+    }).toThrow(
+      new Error(
+        "When using spot instances, please set multiple instance types."
+      )
+    )
   })
 
   test("error when specifying multiple instance types with on-demand", () => {
@@ -77,11 +82,15 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     expect(() => {
-      new Ec2Cluster(stack, "Ec2Cluster", {
-        vpc,
+      const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
         instanceTypes: ["t3.medium", "t2.medium"],
+        vpc,
       })
-    }).toThrow(new Error("When using on-demand instances, please set single instance type."))
+    }).toThrow(
+      new Error(
+        "When using on-demand instances, please set single instance type."
+      )
+    )
   })
 
   test("error when specifying multiple instance types with onDemandPercentage: 100", () => {
@@ -89,11 +98,15 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     expect(() => {
-      new Ec2Cluster(stack, "Ec2Cluster", {
-        vpc,
+      const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
         instanceTypes: ["t3.medium", "t2.medium"],
         onDemandPercentage: 100,
+        vpc,
       })
-    }).toThrow(new Error("When using on-demand instances, please set single instance type."))
+    }).toThrow(
+      new Error(
+        "When using on-demand instances, please set single instance type."
+      )
+    )
   })
 })
