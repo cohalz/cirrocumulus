@@ -429,7 +429,7 @@ Object {
               "action": "aws:runShellScript",
               "inputs": Object {
                 "runCommand": Array [
-                  "set -e",
+                  "set -eux",
                   Object {
                     "Fn::Join": Array [
                       "",
