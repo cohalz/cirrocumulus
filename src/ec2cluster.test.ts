@@ -77,6 +77,23 @@ describe("ec2cluster", () => {
     )
   })
 
+  test("error when specifying a single instance type with onDemandPercentage: 0", () => {
+    const stack = new Stack()
+    const vpc = new Vpc(stack, "VPC")
+
+    expect(() => {
+      const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
+        instanceTypes: ["t3.medium"],
+        onDemandPercentage: 0,
+        vpc,
+      })
+    }).toThrow(
+      new Error(
+        "When using spot instances, please set multiple instance types."
+      )
+    )
+  })
+
   test("error when specifying multiple instance types with on-demand", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
