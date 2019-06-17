@@ -90,7 +90,8 @@ export class Ec2Cluster extends Construct {
     })
 
     this.spot =
-      props.onDemandPercentage && props.onDemandPercentage !== 100
+      typeof props.onDemandPercentage !== "undefined" &&
+      props.onDemandPercentage! < 100
         ? true
         : false
 
