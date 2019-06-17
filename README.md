@@ -40,7 +40,7 @@ export class SampleStack extends cdk.Stack {
     })
 
     new DeployFiles(this, "UpdateFiles", {
-      source: "example/",
+      source: "examples/",
       instanceRole: ec2Cluster.instanceRole,
       targets: [{
         key: 'tag:ClusterName',
