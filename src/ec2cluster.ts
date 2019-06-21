@@ -79,7 +79,7 @@ export class Ec2Cluster extends Construct {
   public readonly cluster: Cluster
   public autoScalingGroupName: string
   public instanceRole: Role
-  public spot: boolean
+  public onDemandOnly: boolean
 
   constructor(scope: Construct, id: string, props: ClusterProps) {
     super(scope, id)
@@ -89,11 +89,14 @@ export class Ec2Cluster extends Construct {
       vpc: props.vpc,
     })
 
-    this.spot =
-      typeof props.onDemandPercentage !== "undefined" &&
-      props.onDemandPercentage! < 100
-        ? true
-        : false
+    if (
+      typeof props.onDemandPercentage === "undefined" ||
+      props.onDemandPercentage >= 100
+    ) {
+      this.onDemandOnly = true
+    } else {
+      this.onDemandOnly = false
+    }
 
     const asg = this.createAutoScalingGroup(
       scope,
@@ -117,18 +120,15 @@ export class Ec2Cluster extends Construct {
     vpc: IVpc,
     props: ClusterProps
   ) => {
-    if (this.spot) {
-      if (props.instanceTypes.length <= 1) {
-        throw new Error(
-          "When using spot instances, please set multiple instance types."
-        )
-      }
-    } else {
-      if (props.instanceTypes.length > 1) {
-        throw new Error(
-          "When using on-demand instances, please set single instance type."
-        )
-      }
+    if (this.onDemandOnly && props.instanceTypes.length > 1) {
+      throw new Error(
+        "When using on-demand instances, please set single instance type."
+      )
+    }
+    if (!this.onDemandOnly && props.instanceTypes.length <= 1) {
+      throw new Error(
+        "When using spot instances, please set multiple instance types."
+      )
     }
 
     const ami = new EcsOptimizedAmi({
@@ -268,7 +268,7 @@ export class Ec2Cluster extends Construct {
       },
     }
 
-    if (!this.spot) {
+    if (this.onDemandOnly) {
       cfnAsg.addPropertyOverride("LaunchTemplate", {
         LaunchTemplateId: launchTemplate.ref,
         Version: launchTemplate.launchTemplateLatestVersionNumber,
