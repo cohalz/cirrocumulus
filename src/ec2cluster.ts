@@ -269,7 +269,7 @@ export class Ec2Cluster extends Construct {
 
     if (this.onDemandOnly) {
       cfnAsg.addPropertyOverride("LaunchTemplate", {
-        LaunchTemplateId: launchTemplate.ref,
+        LaunchTemplateId: launchTemplate.refAsString,
         Version: launchTemplate.attrLatestVersionNumber,
       })
     } else {
@@ -279,7 +279,7 @@ export class Ec2Cluster extends Construct {
         },
         LaunchTemplate: {
           LaunchTemplateSpecification: {
-            LaunchTemplateId: launchTemplate.ref,
+            LaunchTemplateId: launchTemplate.refAsString,
             Version: launchTemplate.attrLatestVersionNumber,
           },
           Overrides: props.instanceTypes.map(instanceType => ({
