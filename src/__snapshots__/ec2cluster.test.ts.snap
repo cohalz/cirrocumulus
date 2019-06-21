@@ -226,7 +226,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "autoscaling:CompleteLifecycleAction",
                 "ec2:DescribeInstances",
                 "ec2:DescribeInstanceAttribute",
                 "ec2:DescribeInstanceStatus",
@@ -236,17 +235,55 @@ def pick(dct, *keys):
               "Resource": "*",
             },
             Object {
+              "Action": "autoscaling:CompleteLifecycleAction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":autoscaling:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":autoScalingGroup:*:autoScalingGroupName/",
+                    Object {
+                      "Ref": "AutoScalingGroupASG804C35BE",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
               "Action": Array [
-                "ecs:ListContainerInstances",
-                "ecs:SubmitContainerStateChange",
-                "ecs:SubmitTaskStateChange",
                 "ecs:DescribeContainerInstances",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
                 "ecs:DescribeTasks",
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:ListContainerInstances",
+                "ecs:SubmitContainerStateChange",
+                "ecs:SubmitTaskStateChange",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "Ec2Cluster796ACAF5",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1328,7 +1365,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "autoscaling:CompleteLifecycleAction",
                 "ec2:DescribeInstances",
                 "ec2:DescribeInstanceAttribute",
                 "ec2:DescribeInstanceStatus",
@@ -1338,17 +1374,55 @@ def pick(dct, *keys):
               "Resource": "*",
             },
             Object {
+              "Action": "autoscaling:CompleteLifecycleAction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":autoscaling:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":autoScalingGroup:*:autoScalingGroupName/",
+                    Object {
+                      "Ref": "AutoScalingGroupASG804C35BE",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
               "Action": Array [
-                "ecs:ListContainerInstances",
-                "ecs:SubmitContainerStateChange",
-                "ecs:SubmitTaskStateChange",
                 "ecs:DescribeContainerInstances",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
                 "ecs:DescribeTasks",
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:ListContainerInstances",
+                "ecs:SubmitContainerStateChange",
+                "ecs:SubmitTaskStateChange",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "Ec2Cluster796ACAF5",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -2431,7 +2505,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "autoscaling:CompleteLifecycleAction",
                 "ec2:DescribeInstances",
                 "ec2:DescribeInstanceAttribute",
                 "ec2:DescribeInstanceStatus",
@@ -2441,17 +2514,55 @@ def pick(dct, *keys):
               "Resource": "*",
             },
             Object {
+              "Action": "autoscaling:CompleteLifecycleAction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":autoscaling:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":autoScalingGroup:*:autoScalingGroupName/",
+                    Object {
+                      "Ref": "AutoScalingGroupASG804C35BE",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
               "Action": Array [
-                "ecs:ListContainerInstances",
-                "ecs:SubmitContainerStateChange",
-                "ecs:SubmitTaskStateChange",
                 "ecs:DescribeContainerInstances",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
                 "ecs:DescribeTasks",
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:ListContainerInstances",
+                "ecs:SubmitContainerStateChange",
+                "ecs:SubmitTaskStateChange",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "Ec2Cluster796ACAF5",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -3557,7 +3668,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "autoscaling:CompleteLifecycleAction",
                 "ec2:DescribeInstances",
                 "ec2:DescribeInstanceAttribute",
                 "ec2:DescribeInstanceStatus",
@@ -3567,17 +3677,55 @@ def pick(dct, *keys):
               "Resource": "*",
             },
             Object {
+              "Action": "autoscaling:CompleteLifecycleAction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":autoscaling:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":autoScalingGroup:*:autoScalingGroupName/",
+                    Object {
+                      "Ref": "AutoScalingGroupASG804C35BE",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
               "Action": Array [
-                "ecs:ListContainerInstances",
-                "ecs:SubmitContainerStateChange",
-                "ecs:SubmitTaskStateChange",
                 "ecs:DescribeContainerInstances",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
                 "ecs:DescribeTasks",
               ],
               "Effect": "Allow",
               "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:ListContainerInstances",
+                "ecs:SubmitContainerStateChange",
+                "ecs:SubmitTaskStateChange",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "Ec2Cluster796ACAF5",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
