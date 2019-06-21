@@ -505,7 +505,7 @@ host_name=",
                   Object {
                     "Ref": "Ec2Cluster796ACAF5",
                   },
-                  "-$(echo $instance_id)
+                  "--$(echo $instance_id)
 hostnamectl set-hostname $host_name
 aws ec2 create-tags --region ",
                   Object {
@@ -1607,7 +1607,7 @@ host_name=",
                   Object {
                     "Ref": "Ec2Cluster796ACAF5",
                   },
-                  "-$(echo $instance_id)
+                  "--$(echo $instance_id)
 hostnamectl set-hostname $host_name
 aws ec2 create-tags --region ",
                   Object {
@@ -2734,7 +2734,7 @@ host_name=",
                   Object {
                     "Ref": "Ec2Cluster796ACAF5",
                   },
-                  "-$(echo $instance_id)
+                  "--$(echo $instance_id)
 hostnamectl set-hostname $host_name
 aws ec2 create-tags --region ",
                   Object {
@@ -3836,7 +3836,7 @@ host_name=",
                   Object {
                     "Ref": "Ec2Cluster796ACAF5",
                   },
-                  "-$(echo $instance_id)
+                  "--$(echo $instance_id)
 hostnamectl set-hostname $host_name
 aws ec2 create-tags --region ",
                   Object {
