@@ -107,7 +107,7 @@ export class Ec2Cluster extends Construct {
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
 
-    this.autoScalingGroupName = cfnAsg.autoScalingGroupName!
+    this.autoScalingGroupName = cfnAsg.refAsString
 
     this.instanceRole = asg.node.findChild("InstanceRole") as Role
 
@@ -149,7 +149,7 @@ export class Ec2Cluster extends Construct {
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
 
-    this.autoScalingGroupName = cfnAsg.autoScalingGroupName!
+    this.autoScalingGroupName = cfnAsg.refAsString
 
     const cfnInstanceProfile = asg.node.findChild(
       "InstanceProfile"
