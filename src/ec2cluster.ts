@@ -107,7 +107,7 @@ export class Ec2Cluster extends Construct {
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
 
-    this.autoScalingGroupName = cfnAsg.autoScalingGroupName
+    this.autoScalingGroupName = cfnAsg.autoScalingGroupName!
 
     this.instanceRole = asg.node.findChild("InstanceRole") as Role
 
@@ -149,7 +149,7 @@ export class Ec2Cluster extends Construct {
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
 
-    this.autoScalingGroupName = cfnAsg.autoScalingGroupName
+    this.autoScalingGroupName = cfnAsg.autoScalingGroupName!
 
     const cfnInstanceProfile = asg.node.findChild(
       "InstanceProfile"
@@ -159,11 +159,9 @@ export class Ec2Cluster extends Construct {
       "InstanceSecurityGroup"
     ) as SecurityGroup
 
-    this.instanceRole.addToPolicy(
-      new PolicyStatement()
-        .addActions("ec2:CreateTags", "ec2:DescribeInstances")
-        .addAllResources()
-    )
+    const instancePolicy = new PolicyStatement()
+    instancePolicy.addActions("ec2:CreateTags", "ec2:DescribeInstances")
+    instancePolicy.addAllResources()
 
     const tags = [
       {
@@ -213,7 +211,7 @@ export class Ec2Cluster extends Construct {
       "AutoScalingGroupLaunchTemplate",
       {
         launchTemplateData: {
-          iamInstanceProfile: { name: cfnInstanceProfile.ref },
+          iamInstanceProfile: { name: cfnInstanceProfile.ref.toString() },
           imageId: ami.getImage(scope).imageId,
           instanceType: props.instanceTypes[0],
           securityGroupIds: [securityGroup.securityGroupId],
@@ -271,7 +269,7 @@ export class Ec2Cluster extends Construct {
     if (this.onDemandOnly) {
       cfnAsg.addPropertyOverride("LaunchTemplate", {
         LaunchTemplateId: launchTemplate.ref,
-        Version: launchTemplate.launchTemplateLatestVersionNumber,
+        Version: launchTemplate.attrLatestVersionNumber,
       })
     } else {
       cfnAsg.addPropertyOverride("MixedInstancesPolicy", {
@@ -281,7 +279,7 @@ export class Ec2Cluster extends Construct {
         LaunchTemplate: {
           LaunchTemplateSpecification: {
             LaunchTemplateId: launchTemplate.ref,
-            Version: launchTemplate.launchTemplateLatestVersionNumber,
+            Version: launchTemplate.attrLatestVersionNumber,
           },
           Overrides: props.instanceTypes.map(instanceType => ({
             InstanceType: instanceType,
