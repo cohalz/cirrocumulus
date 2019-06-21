@@ -162,6 +162,7 @@ export class Ec2Cluster extends Construct {
     const instancePolicy = new PolicyStatement()
     instancePolicy.addActions("ec2:CreateTags", "ec2:DescribeInstances")
     instancePolicy.addAllResources()
+    this.instanceRole.addToPolicy(instancePolicy)
 
     const tags = [
       {
