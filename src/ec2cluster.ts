@@ -212,7 +212,7 @@ export class Ec2Cluster extends Construct {
       "AutoScalingGroupLaunchTemplate",
       {
         launchTemplateData: {
-          iamInstanceProfile: { name: cfnInstanceProfile.ref.toString() },
+          iamInstanceProfile: { name: cfnInstanceProfile.refAsString },
           imageId: ami.getImage(scope).imageId,
           instanceType: props.instanceTypes[0],
           securityGroupIds: [securityGroup.securityGroupId],

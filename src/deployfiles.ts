@@ -58,12 +58,12 @@ export class DeployFiles extends Construct {
     this.createEventToAutoDeploy(
       scope,
       this.bucket,
-      document.ref.toString(),
+      document.refAsString,
       props.targets
     )
 
     const association = new CfnAssociation(scope, "AssociationToDeploy", {
-      name: document.ref.toString(),
+      name: document.refAsString,
       scheduleExpression: "cron(0 10 ? * * *)",
       targets: props.targets,
     })
