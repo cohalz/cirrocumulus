@@ -195,7 +195,7 @@ export class Ec2Cluster extends Construct {
         `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
         "systemctl start amazon-ssm-agent",
         "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
-        `host_name=${clusterName}-$(echo $instance_id)`,
+        `host_name=${clusterName}--$(echo $instance_id)`,
         "hostnamectl set-hostname $host_name",
         `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=Name,Value=$host_name`,
         "until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;",
