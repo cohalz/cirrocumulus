@@ -17,7 +17,7 @@ describe("deployfiles", () => {
       targets: [
         {
           key: "aws:cloudformation:stack-name",
-          values: [stack.name],
+          values: [stack.stackName],
         },
       ],
     })

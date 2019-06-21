@@ -11,7 +11,7 @@ describe("scalingplan", () => {
       tagFilters: [
         {
           key: "aws:cloudformation:stack-name",
-          values: [stack.name],
+          values: [stack.stackName],
         },
       ],
     })
@@ -29,7 +29,7 @@ describe("scalingplan", () => {
       tagFilters: [
         {
           key: "aws:cloudformation:stack-name",
-          values: [stack.name],
+          values: [stack.stackName],
         },
       ],
     })
@@ -45,7 +45,7 @@ describe("scalingplan", () => {
       tagFilters: [
         {
           key: "aws:cloudformation:stack-name",
-          values: [stack.name],
+          values: [stack.stackName],
         },
       ],
       targetPercentage: 60,

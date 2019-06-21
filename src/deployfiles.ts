@@ -1,8 +1,8 @@
 import { ReadWriteType, Trail } from "@aws-cdk/aws-cloudtrail"
 import { IRuleTarget, Rule } from "@aws-cdk/aws-events"
 import {
-  AwsManagedPolicy,
   CfnManagedPolicy,
+  ManagedPolicy,
   PolicyDocument,
   PolicyStatement,
   Role,
@@ -47,8 +47,8 @@ export class DeployFiles extends Construct {
       props.source
     )
 
-    props.instanceRole.attachManagedPolicy(
-      new AwsManagedPolicy("service-role/AmazonEC2RoleforSSM", scope).policyArn
+    props.instanceRole.addManagedPolicy(
+      ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
     )
 
     const s3Path = `${this.bucket.bucketName}/${props.source}`
@@ -58,12 +58,12 @@ export class DeployFiles extends Construct {
     this.createEventToAutoDeploy(
       scope,
       this.bucket,
-      document.documentName,
+      document.refAsString,
       props.targets
     )
 
     const association = new CfnAssociation(scope, "AssociationToDeploy", {
-      name: document.ref,
+      name: document.refAsString,
       scheduleExpression: "cron(0 10 ? * * *)",
       targets: props.targets,
     })
@@ -78,11 +78,10 @@ export class DeployFiles extends Construct {
       blockPublicAccess: BlockPublicAccess.BlockAll,
     })
 
-    instanceRole.addToPolicy(
-      new PolicyStatement()
-        .addActions("s3:Get*", "s3:List*")
-        .addResources(bucket.bucketArn, bucket.arnForObjects("*"))
-    )
+    const s3Policy = new PolicyStatement()
+    s3Policy.addActions("s3:Get*", "s3:List*")
+    s3Policy.addResources(bucket.bucketArn, bucket.arnForObjects("*"))
+    instanceRole.addToPolicy(s3Policy)
 
     const absolutePath = path.join(process.cwd(), localDir)
     const bucketDeployment = new BucketDeployment(scope, "BucketDeployment", {
@@ -154,23 +153,18 @@ export class DeployFiles extends Construct {
       },
     })
 
-    const eventPolicyDoc = new PolicyDocument().addStatement(
-      new PolicyStatement()
-        .addAction("ssm:SendCommand")
-        .addResources(
-          `arn:aws:ssm:${Aws.region}:*:document/*`,
-          `arn:aws:ec2:${Aws.region}:*:instance/*`
-        )
+    const eventPolicyStatement = new PolicyStatement()
+    eventPolicyStatement.addActions("ssm:SendCommand")
+    eventPolicyStatement.addResources(
+      `arn:aws:ssm:${Aws.region}:*:document/*`,
+      `arn:aws:ec2:${Aws.region}:*:instance/*`
     )
-
-    const eventPolicy = new CfnManagedPolicy(scope, "PolicyForAutoDeploy", {
-      policyDocument: Stack.of(scope).resolve(eventPolicyDoc),
-    })
 
     const eventRole = new Role(scope, "EventRoleForAutoDeploy", {
       assumedBy: new ServicePrincipal("events.amazonaws.com"),
-      managedPolicyArns: [eventPolicy.ref],
     })
+
+    eventRole.addToPolicy(eventPolicyStatement)
 
     const target: IRuleTarget = {
       bind: () => ({
