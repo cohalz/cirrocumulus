@@ -14,17 +14,8 @@ import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/cdk"
 
-export interface Ec2ClusterProps
-  extends Pick<
-    AutoScalingGroupProps,
-    Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
-  > {
-  /**
-   * The instance types
-   *
-   * When using spot instances, must set multiple instance types
-   */
-  instanceTypes: string[]
+export interface Ec2ClusterProps {
+  autoScalingGroup: EcsAutoScalingGroupProps
 
   /**
    * A name for the cluster
@@ -53,6 +44,19 @@ export interface Ec2ClusterProps
   tags?: { [key: string]: string }
 }
 
+export interface EcsAutoScalingGroupProps
+  extends Pick<
+    AutoScalingGroupProps,
+    Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
+  > {
+  /**
+   * The instance types
+   *
+   * When using spot instances, must set multiple instance types
+   */
+  instanceTypes: string[]
+}
+
 export class Ec2Cluster extends Construct {
   public readonly ami: EcsOptimizedAmi
   public readonly autoScalingGroup: AutoScalingGroup
@@ -64,7 +68,7 @@ export class Ec2Cluster extends Construct {
 
     this.cluster = new Cluster(this, "Cluster", {
       clusterName: props.name,
-      vpc: props.vpc,
+      vpc: props.autoScalingGroup.vpc,
     })
 
     if (
@@ -80,46 +84,49 @@ export class Ec2Cluster extends Construct {
       generation: AmazonLinuxGeneration.AmazonLinux2,
     })
 
-    this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
+    this.autoScalingGroup = this.createAutoScalingGroup(
+      scope,
+      props.autoScalingGroup
+    )
 
     const launchTemplate = this.createLaunchTemplate(
       scope,
-      props.instanceTypes[0],
+      props.autoScalingGroup.instanceTypes[0],
       props.tags,
       props.userData
     )
 
     this.useLaunchTemplate(
       launchTemplate,
-      props.instanceTypes,
+      props.autoScalingGroup.instanceTypes,
       props.onDemandPercentage
     )
 
-    this.addCfnPolicy(props.minCapacity)
+    this.addCfnPolicy(props.autoScalingGroup.minCapacity)
 
     this.cluster.addAutoScalingGroup(this.autoScalingGroup)
   }
 
   private createAutoScalingGroup = (
     scope: Construct,
-    props: Ec2ClusterProps
+    ecsAsgProps: EcsAutoScalingGroupProps
   ) => {
-    if (this.onDemandOnly && props.instanceTypes.length > 1) {
+    if (this.onDemandOnly && ecsAsgProps.instanceTypes.length > 1) {
       throw new Error(
         "When using on-demand instances, please set single instance type."
       )
     }
-    if (!this.onDemandOnly && props.instanceTypes.length <= 1) {
+    if (!this.onDemandOnly && ecsAsgProps.instanceTypes.length <= 1) {
       throw new Error(
         "When using spot instances, please set multiple instance types."
       )
     }
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
-      instanceType: new InstanceType(props.instanceTypes[0]),
+      instanceType: new InstanceType(ecsAsgProps.instanceTypes[0]),
       machineImage: this.ami,
       updateType: UpdateType.ReplacingUpdate,
-      ...props,
+      ...ecsAsgProps,
     })
   }
 

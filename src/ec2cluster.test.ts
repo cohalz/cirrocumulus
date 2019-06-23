@@ -10,8 +10,10 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium"],
-      vpc,
+      autoScalingGroup: {
+        instanceTypes: ["t3.medium"],
+        vpc,
+      },
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -22,9 +24,11 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium", "t2.medium"],
+      autoScalingGroup: {
+        instanceTypes: ["t3.medium", "t2.medium"],
+        vpc,
+      },
       onDemandPercentage: 20,
-      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -35,9 +39,11 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium"],
+      autoScalingGroup: {
+        instanceTypes: ["t3.medium"],
+        vpc,
+      },
       userData: ["echo 1"],
-      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -48,13 +54,15 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium"],
+      autoScalingGroup: {
+        instanceTypes: ["t3.medium"],
+        vpc,
+      },
       tags: {
         Env: "develop",
         Service: "example",
         roles: "develop:personal,misc:misc",
       },
-      vpc,
     })
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
@@ -66,9 +74,11 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instanceTypes: ["t3.medium"],
+        autoScalingGroup: {
+          instanceTypes: ["t3.medium"],
+          vpc,
+        },
         onDemandPercentage: 20,
-        vpc,
       })
     }).toThrow(
       new Error(
@@ -83,9 +93,11 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instanceTypes: ["t3.medium"],
+        autoScalingGroup: {
+          instanceTypes: ["t3.medium"],
+          vpc,
+        },
         onDemandPercentage: 0,
-        vpc,
       })
     }).toThrow(
       new Error(
@@ -100,8 +112,10 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instanceTypes: ["t3.medium", "t2.medium"],
-        vpc,
+        autoScalingGroup: {
+          instanceTypes: ["t3.medium", "t2.medium"],
+          vpc,
+        },
       })
     }).toThrow(
       new Error(
@@ -116,9 +130,10 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instanceTypes: ["t3.medium", "t2.medium"],
-        onDemandPercentage: 100,
-        vpc,
+        autoScalingGroup: {
+          instanceTypes: ["t3.medium", "t2.medium"],
+          vpc,
+        },
       })
     }).toThrow(
       new Error(
