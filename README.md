@@ -27,33 +27,34 @@ export class SampleStack extends cdk.Stack {
     const vpcProvider = new ec2.VpcNetworkProvider(this, { tags: { 'tag:Env': 'Prod' } })
     const vpc = ec2.Vpc.fromVpcAttributes(this, 'ExternalVpc', vpcProvider.vpcProps)
 
-    const ec2Cluster = new Ec2Cluster(this, "Ec2Cluster", {
+    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
+      instanceTypes: ["t3.medium"],
       vpc,
-      instanceTypes: ['t3.medium'],
-      desiredCapacity: 1,
-      maxCapacity: 2,
-      tags: {
-        Service: "sample",
-        Env: "develop",
-        roles: "develop:personal,misc:misc"
-      }
     })
 
-    new DeployFiles(this, "UpdateFiles", {
+    const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
+      "InstanceRole"
+    ) as Role
+
+    const deployFiles = new DeployFiles(stack, "UpdateFiles", {
+      instanceRole,
       source: "examples/",
-      instanceRole: ec2Cluster.instanceRole,
-      targets: [{
-        key: 'tag:ClusterName',
-        values: [ec2Cluster.cluster.clusterName]
-      }]
+      targets: [
+        {
+          key: "tag:ClusterName",
+          values: [ec2Cluster.cluster.clusterName],
+        },
+      ],
     })
 
-    new ScalingPlan(this, "ScalingPlan", {
-      autoScalingGroupName: ec2Cluster.autoScalingGroupName,
-      tagFilters: [{
-        key: 'ClusterName',
-        values: [ec2Cluster.cluster.clusterName]
-      }]
+    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
+      autoScalingGroupName: ec2Cluster.autoScalingGroup.autoScalingGroupName,
+      tagFilters: [
+        {
+          key: "ClusterName",
+          values: [ec2Cluster.cluster.clusterName],
+        },
+      ],
     })
 
     const ecsService = new ecsPatterns.LoadBalancedEc2Service(this, "Ec2Service", {
