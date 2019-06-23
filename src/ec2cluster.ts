@@ -217,18 +217,20 @@ export class Ec2Cluster extends Construct {
     logicalId: string,
     userData?: string[]
   ) {
-    const configureECSConfig = [
+    // https://github.com/aws/amazon-ecs-agent/issues/1707#issuecomment-490498502
+    const configureECSService = [
       'sed -i "/After=cloud-final.service/d" /usr/lib/systemd/system/ecs.service',
       "systemctl daemon-reload",
       "exec 2>>/var/log/ecs-agent-reload.log",
+    ]
+
+    const ecsConfig = [
       `echo ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config`,
       "cat << EOF >> /etc/ecs/ecs.config",
       'ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","awslogs","fluentd","syslog","journald","gelf","logentries","splunk"]',
       "ECS_ENABLE_CONTAINER_METADATA=true",
       "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m",
       "EOF",
-      "systemctl restart docker",
-      "systemctl restart ecs",
     ]
 
     const installSSMAgent = [
@@ -254,7 +256,8 @@ export class Ec2Cluster extends Construct {
         "#!/bin/sh",
         "yum update -y",
         "yum install -y aws-cfn-bootstrap aws-cli",
-        ...configureECSConfig,
+        ...configureECSService,
+        ...ecsConfig,
         ...installSSMAgent,
         ...setHostName,
         ...setTags,
