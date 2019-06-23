@@ -245,7 +245,7 @@ export class Ec2Cluster extends Construct {
       `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=Name,Value=$host_name`,
     ]
 
-    const setTags = [
+    const setArnTag = [
       "until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;",
       'container_instance_arn=$(echo "${metadata}" | jq -er ".ContainerInstanceArn")',
       `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
@@ -260,7 +260,7 @@ export class Ec2Cluster extends Construct {
         ...ecsConfig,
         ...installSSMAgent,
         ...setHostName,
-        ...setTags,
+        ...setArnTag,
         ...(userData || []),
         `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.stackName} --resource ${logicalId} --region ${Aws.region}`,
       ].join("\n")
