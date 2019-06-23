@@ -13,10 +13,8 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      autoScalingGroup: {
-        instanceTypes: ["t3.medium"],
-        vpc,
-      },
+      instanceTypes: ["t3.medium"],
+      vpc,
     })
 
     const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
