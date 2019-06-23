@@ -107,6 +107,8 @@ export class Ec2Cluster extends Construct {
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
 
+    this.addCfnPolicy(asg, props.minCapacity)
+
     this.autoScalingGroupName = cfnAsg.refAsString
 
     this.instanceRole = asg.node.findChild("InstanceRole") as Role
@@ -145,6 +147,33 @@ export class Ec2Cluster extends Construct {
       vpc,
     })
 
+    const launchTemplate = this.createLaunchTemplate(
+      scope,
+      clusterName,
+      vpc,
+      props,
+      asg,
+      ami
+    )
+
+    this.useLaunchTemplate(
+      asg,
+      launchTemplate,
+      props.instanceTypes,
+      props.onDemandPercentage
+    )
+
+    return asg
+  }
+
+  private createLaunchTemplate(
+    scope: Construct,
+    clusterName: string,
+    vpc: IVpc,
+    props: ClusterProps,
+    asg: AutoScalingGroup,
+    ami: EcsOptimizedAmi
+  ) {
     this.instanceRole = asg.node.findChild("InstanceRole") as Role
 
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
@@ -207,9 +236,7 @@ export class Ec2Cluster extends Construct {
       }
     )
 
-    this.overrideAsg(asg, launchTemplate, props)
-
-    return asg
+    return launchTemplate
   }
 
   private configureUserData(
@@ -262,19 +289,12 @@ export class Ec2Cluster extends Construct {
     )
   }
 
-  private overrideAsg = (
-    asg: AutoScalingGroup,
-    launchTemplate: CfnLaunchTemplate,
-    props: ClusterProps
-  ) => {
+  private addCfnPolicy = (asg: AutoScalingGroup, minCapacity?: number) => {
     const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
-
-    // XXX https://github.com/awslabs/aws-cdk/issues/1408
-    cfnAsg.addPropertyDeletionOverride("LaunchConfigurationName")
 
     cfnAsg.options.creationPolicy = {
       resourceSignal: {
-        count: props.minCapacity ? props.minCapacity : 1,
+        count: minCapacity ? minCapacity : 1,
         timeout: "PT7M",
       },
     }
@@ -282,7 +302,7 @@ export class Ec2Cluster extends Construct {
     cfnAsg.options.updatePolicy = {
       autoScalingRollingUpdate: {
         maxBatchSize: 1,
-        minInstancesInService: props.minCapacity ? props.minCapacity : 1,
+        minInstancesInService: minCapacity ? minCapacity : 1,
         suspendProcesses: [
           "HealthCheck",
           "ReplaceUnhealthy",
@@ -293,6 +313,18 @@ export class Ec2Cluster extends Construct {
         waitOnResourceSignals: true,
       },
     }
+  }
+
+  private useLaunchTemplate = (
+    asg: AutoScalingGroup,
+    launchTemplate: CfnLaunchTemplate,
+    instanceTypes: string[],
+    onDemandPercentage?: number
+  ) => {
+    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
+
+    // XXX https://github.com/awslabs/aws-cdk/issues/1408
+    cfnAsg.addPropertyDeletionOverride("LaunchConfigurationName")
 
     if (this.onDemandOnly) {
       cfnAsg.addPropertyOverride("LaunchTemplate", {
@@ -302,14 +334,14 @@ export class Ec2Cluster extends Construct {
     } else {
       cfnAsg.addPropertyOverride("MixedInstancesPolicy", {
         InstancesDistribution: {
-          OnDemandPercentageAboveBaseCapacity: props.onDemandPercentage,
+          OnDemandPercentageAboveBaseCapacity: onDemandPercentage,
         },
         LaunchTemplate: {
           LaunchTemplateSpecification: {
             LaunchTemplateId: launchTemplate.refAsString,
             Version: launchTemplate.attrLatestVersionNumber,
           },
-          Overrides: props.instanceTypes.map(instanceType => ({
+          Overrides: instanceTypes.map(instanceType => ({
             InstanceType: instanceType,
           })),
         },
