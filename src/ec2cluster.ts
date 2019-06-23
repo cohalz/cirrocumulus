@@ -1,5 +1,6 @@
 import {
   AutoScalingGroup,
+  AutoScalingGroupProps,
   CfnAutoScalingGroup,
   UpdateType,
 } from "@aws-cdk/aws-autoscaling"
@@ -7,20 +8,17 @@ import {
   AmazonLinuxGeneration,
   CfnLaunchTemplate,
   InstanceType,
-  IVpc,
   SecurityGroup,
 } from "@aws-cdk/aws-ec2"
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
-import { CfnInstanceProfile, PolicyStatement, Role } from "@aws-cdk/aws-iam"
+import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/cdk"
 
-export interface ClusterProps {
-  /**
-   * The VPC where your ECS instances will be running or your ENIs will be deployed
-   *
-   */
-  vpc: IVpc
-
+export interface ClusterProps
+  extends Pick<
+    AutoScalingGroupProps,
+    Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
+  > {
   /**
    * The instance types
    *
@@ -34,26 +32,6 @@ export interface ClusterProps {
    * @default CloudFormation-generated name
    */
   name?: string
-  /**
-   * Minimum number of instances in the fleet
-   *
-   * @default 1
-   */
-  minCapacity?: number
-
-  /**
-   * Maximum number of instances in the fleet
-   *
-   * @default desiredCapacity
-   */
-  maxCapacity?: number
-
-  /**
-   * Initial amount of instances in the fleet
-   *
-   * @default 1
-   */
-  desiredCapacity?: number
 
   /**
    * The percentage of On-Demand Instances for your capacity when using Spot Instances
@@ -76,8 +54,9 @@ export interface ClusterProps {
 }
 
 export class Ec2Cluster extends Construct {
+  public readonly ami: EcsOptimizedAmi
+  public readonly autoScalingGroup: AutoScalingGroup
   public readonly cluster: Cluster
-  public autoScalingGroup: AutoScalingGroup
   private readonly onDemandOnly: boolean
 
   constructor(scope: Construct, id: string, props: ClusterProps) {
@@ -97,15 +76,14 @@ export class Ec2Cluster extends Construct {
       this.onDemandOnly = false
     }
 
-    this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
-
-    const ami = new EcsOptimizedAmi({
+    this.ami = new EcsOptimizedAmi({
       generation: AmazonLinuxGeneration.AmazonLinux2,
     })
 
+    this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
+
     const launchTemplate = this.createLaunchTemplate(
       scope,
-      ami,
       props.instanceTypes[0],
       props.tags,
       props.userData
@@ -134,27 +112,19 @@ export class Ec2Cluster extends Construct {
       )
     }
 
-    const ami = new EcsOptimizedAmi({
-      generation: AmazonLinuxGeneration.AmazonLinux2,
-    })
-
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
-      desiredCapacity: props.desiredCapacity,
       instanceType: new InstanceType(props.instanceTypes[0]),
-      machineImage: ami,
-      maxCapacity: props.maxCapacity,
-      minCapacity: props.minCapacity,
+      machineImage: this.ami,
       updateType: UpdateType.ReplacingUpdate,
-      vpc: props.vpc,
+      ...props,
     })
   }
 
   private createLaunchTemplate(
     scope: Construct,
-    ami: EcsOptimizedAmi,
     instanceType: string,
-    tags2?: { [key: string]: string },
-    userData2?: string[]
+    extraTags?: { [key: string]: string },
+    extraUserData?: string[]
   ) {
     const cfnAsg = this.autoScalingGroup.node.findChild(
       "ASG"
@@ -180,43 +150,37 @@ export class Ec2Cluster extends Construct {
       },
     ]
 
-    if (tags2) {
-      for (const key of Object.keys(tags2)) {
-        tags.push({ key, value: tags2[key] })
+    if (extraTags) {
+      for (const key of Object.keys(extraTags)) {
+        tags.push({ key, value: extraTags[key] })
       }
     }
 
     const userData = this.configureUserData(
       this.cluster.clusterName,
       cfnAsg.logicalId,
-      userData2
+      extraUserData
     )
 
-    const launchTemplate = new CfnLaunchTemplate(
-      scope,
-      "AutoScalingGroupLaunchTemplate",
-      {
-        launchTemplateData: {
-          iamInstanceProfile: { name: cfnInstanceProfile.refAsString },
-          imageId: ami.getImage(scope).imageId,
-          instanceType,
-          securityGroupIds: [securityGroup.securityGroupId],
-          tagSpecifications: [
-            {
-              resourceType: "instance",
-              tags,
-            },
-            {
-              resourceType: "volume",
-              tags,
-            },
-          ],
-          userData,
-        },
-      }
-    )
-
-    return launchTemplate
+    return new CfnLaunchTemplate(scope, "AutoScalingGroupLaunchTemplate", {
+      launchTemplateData: {
+        iamInstanceProfile: { name: cfnInstanceProfile.refAsString },
+        imageId: this.ami.getImage(scope).imageId,
+        instanceType,
+        securityGroupIds: [securityGroup.securityGroupId],
+        tagSpecifications: [
+          {
+            resourceType: "instance",
+            tags,
+          },
+          {
+            resourceType: "volume",
+            tags,
+          },
+        ],
+        userData,
+      },
+    })
   }
 
   private configureUserData(
