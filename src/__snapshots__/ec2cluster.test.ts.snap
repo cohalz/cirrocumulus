@@ -517,6 +517,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
+yum install -y aws-cfn-bootstrap aws-cli
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -530,13 +531,14 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y aws-cfn-bootstrap aws-cli jq
+systemctl restart docker
+systemctl restart ecs
+yum install -y jq
 yum install -y https://amazon-ssm-",
                   Object {
                     "Ref": "AWS::Region",
                   },
                   ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-systemctl start amazon-ssm-agent
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -550,8 +552,6 @@ aws ec2 create-tags --region ",
                   },
                   " --resources $instance_id --tags Key=Name,Value=$host_name
 until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;
-systemctl restart docker
-systemctl restart ecs
 container_instance_arn=$(echo \\"\${metadata}\\" | jq -er \\".ContainerInstanceArn\\")
 aws ec2 create-tags --region ",
                   Object {
@@ -1656,6 +1656,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
+yum install -y aws-cfn-bootstrap aws-cli
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -1669,13 +1670,14 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y aws-cfn-bootstrap aws-cli jq
+systemctl restart docker
+systemctl restart ecs
+yum install -y jq
 yum install -y https://amazon-ssm-",
                   Object {
                     "Ref": "AWS::Region",
                   },
                   ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-systemctl start amazon-ssm-agent
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -1689,8 +1691,6 @@ aws ec2 create-tags --region ",
                   },
                   " --resources $instance_id --tags Key=Name,Value=$host_name
 until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;
-systemctl restart docker
-systemctl restart ecs
 container_instance_arn=$(echo \\"\${metadata}\\" | jq -er \\".ContainerInstanceArn\\")
 aws ec2 create-tags --region ",
                   Object {
@@ -2820,6 +2820,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
+yum install -y aws-cfn-bootstrap aws-cli
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -2833,13 +2834,14 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y aws-cfn-bootstrap aws-cli jq
+systemctl restart docker
+systemctl restart ecs
+yum install -y jq
 yum install -y https://amazon-ssm-",
                   Object {
                     "Ref": "AWS::Region",
                   },
                   ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-systemctl start amazon-ssm-agent
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -2853,8 +2855,6 @@ aws ec2 create-tags --region ",
                   },
                   " --resources $instance_id --tags Key=Name,Value=$host_name
 until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;
-systemctl restart docker
-systemctl restart ecs
 container_instance_arn=$(echo \\"\${metadata}\\" | jq -er \\".ContainerInstanceArn\\")
 aws ec2 create-tags --region ",
                   Object {
@@ -3959,6 +3959,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
+yum install -y aws-cfn-bootstrap aws-cli
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -3972,13 +3973,14 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y aws-cfn-bootstrap aws-cli jq
+systemctl restart docker
+systemctl restart ecs
+yum install -y jq
 yum install -y https://amazon-ssm-",
                   Object {
                     "Ref": "AWS::Region",
                   },
                   ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-systemctl start amazon-ssm-agent
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -3992,8 +3994,6 @@ aws ec2 create-tags --region ",
                   },
                   " --resources $instance_id --tags Key=Name,Value=$host_name
 until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;
-systemctl restart docker
-systemctl restart ecs
 container_instance_arn=$(echo \\"\${metadata}\\" | jq -er \\".ContainerInstanceArn\\")
 aws ec2 create-tags --region ",
                   Object {
