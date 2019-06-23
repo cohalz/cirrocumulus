@@ -261,6 +261,7 @@ export class Ec2Cluster extends Construct {
     }
   }
 
+  // use LaunchTemplate instead of LaunchConfiguration
   private useLaunchTemplate = (
     launchTemplate: CfnLaunchTemplate,
     instanceTypes: string[],
