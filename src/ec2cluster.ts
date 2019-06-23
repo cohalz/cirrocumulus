@@ -66,7 +66,7 @@ export interface ClusterProps {
    * Userdata that you want to execute additionally
    *
    */
-  extraUserData?: string[]
+  userData?: string[]
 
   /**
    * Tags to be applied to the Auto Scaling Group
@@ -177,34 +177,10 @@ export class Ec2Cluster extends Construct {
       }
     }
 
-    const userData = Fn.base64(
-      [
-        "#!/bin/sh",
-        "yum update -y",
-        'sed -i "/After=cloud-final.service/d" /usr/lib/systemd/system/ecs.service',
-        "systemctl daemon-reload",
-        "exec 2>>/var/log/ecs-agent-reload.log",
-        `echo ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config`,
-        "cat << EOF >> /etc/ecs/ecs.config",
-        'ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","awslogs","fluentd","syslog","journald","gelf","logentries","splunk"]',
-        "ECS_ENABLE_CONTAINER_METADATA=true",
-        "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m",
-        "EOF",
-        "yum install -y aws-cfn-bootstrap aws-cli jq",
-        `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
-        "systemctl start amazon-ssm-agent",
-        "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
-        `host_name=${clusterName}--$(echo $instance_id)`,
-        "hostnamectl set-hostname $host_name",
-        `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=Name,Value=$host_name`,
-        "until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;",
-        "systemctl restart docker",
-        "systemctl restart ecs",
-        'container_instance_arn=$(echo "${metadata}" | jq -er ".ContainerInstanceArn")',
-        `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
-        ...(props.extraUserData || []),
-        `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.stackName} --resource ${cfnAsg.logicalId} --region ${Aws.region}`,
-      ].join("\n")
+    const userData = this.configureUserData(
+      clusterName,
+      cfnAsg.logicalId,
+      props.userData
     )
 
     const launchTemplate = new CfnLaunchTemplate(
@@ -235,6 +211,57 @@ export class Ec2Cluster extends Construct {
 
     return asg
   }
+
+  private configureUserData(
+    clusterName: string,
+    logicalId: string,
+    userData?: string[]
+  ) {
+    // https://github.com/aws/amazon-ecs-agent/issues/1707#issuecomment-490498502
+    const configureECSService = [
+      'sed -i "/After=cloud-final.service/d" /usr/lib/systemd/system/ecs.service',
+      "systemctl daemon-reload",
+      "exec 2>>/var/log/ecs-agent-reload.log",
+    ]
+
+    const ecsConfig = [
+      `echo ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config`,
+      "cat << EOF >> /etc/ecs/ecs.config",
+      'ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","awslogs","fluentd","syslog","journald","gelf","logentries","splunk"]',
+      "ECS_ENABLE_CONTAINER_METADATA=true",
+      "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m",
+      "EOF",
+    ]
+
+    const setHostName = [
+      "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
+      `host_name=${clusterName}--$(echo $instance_id)`,
+      "hostnamectl set-hostname $host_name",
+      `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=Name,Value=$host_name`,
+    ]
+
+    const setArnTag = [
+      "until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;",
+      'container_instance_arn=$(echo "${metadata}" | jq -er ".ContainerInstanceArn")',
+      `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
+    ]
+
+    return Fn.base64(
+      [
+        "#!/bin/sh",
+        "yum update -y",
+        "yum install -y aws-cfn-bootstrap aws-cli jq",
+        `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
+        ...configureECSService,
+        ...ecsConfig,
+        ...setHostName,
+        ...setArnTag,
+        ...(userData || []),
+        `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.stackName} --resource ${logicalId} --region ${Aws.region}`,
+      ].join("\n")
+    )
+  }
+
   private overrideAsg = (
     asg: AutoScalingGroup,
     launchTemplate: CfnLaunchTemplate,
