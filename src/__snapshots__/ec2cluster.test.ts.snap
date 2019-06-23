@@ -517,7 +517,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
-yum install -y aws-cfn-bootstrap aws-cli
+yum install -y aws-cfn-bootstrap aws-cli jq
+yum install -y https://amazon-ssm-",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -531,12 +536,6 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y jq
-yum install -y https://amazon-ssm-",
-                  Object {
-                    "Ref": "AWS::Region",
-                  },
-                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -1654,7 +1653,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
-yum install -y aws-cfn-bootstrap aws-cli
+yum install -y aws-cfn-bootstrap aws-cli jq
+yum install -y https://amazon-ssm-",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -1668,12 +1672,6 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y jq
-yum install -y https://amazon-ssm-",
-                  Object {
-                    "Ref": "AWS::Region",
-                  },
-                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -2816,7 +2814,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
-yum install -y aws-cfn-bootstrap aws-cli
+yum install -y aws-cfn-bootstrap aws-cli jq
+yum install -y https://amazon-ssm-",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -2830,12 +2833,6 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y jq
-yum install -y https://amazon-ssm-",
-                  Object {
-                    "Ref": "AWS::Region",
-                  },
-                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {
@@ -3953,7 +3950,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 Array [
                   "#!/bin/sh
 yum update -y
-yum install -y aws-cfn-bootstrap aws-cli
+yum install -y aws-cfn-bootstrap aws-cli jq
+yum install -y https://amazon-ssm-",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
 systemctl daemon-reload
 exec 2>>/var/log/ecs-agent-reload.log
@@ -3967,12 +3969,6 @@ ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"sy
 ECS_ENABLE_CONTAINER_METADATA=true
 ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
 EOF
-yum install -y jq
-yum install -y https://amazon-ssm-",
-                  Object {
-                    "Ref": "AWS::Region",
-                  },
-                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 host_name=",
                   Object {

@@ -233,11 +233,6 @@ export class Ec2Cluster extends Construct {
       "EOF",
     ]
 
-    const installSSMAgent = [
-      "yum install -y jq",
-      `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
-    ]
-
     const setHostName = [
       "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
       `host_name=${clusterName}--$(echo $instance_id)`,
@@ -255,10 +250,10 @@ export class Ec2Cluster extends Construct {
       [
         "#!/bin/sh",
         "yum update -y",
-        "yum install -y aws-cfn-bootstrap aws-cli",
+        "yum install -y aws-cfn-bootstrap aws-cli jq",
+        `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
         ...configureECSService,
         ...ecsConfig,
-        ...installSSMAgent,
         ...setHostName,
         ...setArnTag,
         ...(userData || []),
