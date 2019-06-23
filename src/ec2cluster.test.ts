@@ -35,8 +35,8 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      extraUserData: ["echo 1"],
       instanceTypes: ["t3.medium"],
+      userData: ["echo 1"],
       vpc,
     })
 

@@ -66,7 +66,7 @@ export interface ClusterProps {
    * Userdata that you want to execute additionally
    *
    */
-  extraUserData?: string[]
+  userData?: string[]
 
   /**
    * Tags to be applied to the Auto Scaling Group
@@ -180,7 +180,7 @@ export class Ec2Cluster extends Construct {
     const userData = this.configureUserData(
       clusterName,
       cfnAsg.logicalId,
-      props.extraUserData
+      props.userData
     )
 
     const launchTemplate = new CfnLaunchTemplate(
