@@ -1,0 +1,1848 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ec2cluster default 1`] = `
+Object {
+  "Parameters": Object {
+    "BucketDeploymentAssetArtifactHash57B6FAC2": Object {
+      "Description": "Artifact hash for asset \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "BucketDeploymentAssetS3Bucket5FB20E3B": Object {
+      "Description": "S3 bucket for asset \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "BucketDeploymentAssetS3VersionKey0CD87795": Object {
+      "Description": "S3 key for asset version \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeArtifactHashEF37AD24": Object {
+      "Description": "Artifact hash for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7": Object {
+      "Description": "S3 bucket for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0": Object {
+      "Description": "S3 key for asset version \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+  },
+  "Resources": Object {
+    "AssociationToDeploy": Object {
+      "Properties": Object {
+        "Name": Object {
+          "Ref": "DeployCommands",
+        },
+        "ScheduleExpression": "cron(0 10 ? * * *)",
+        "Targets": Array [
+          Object {
+            "Key": "tag:ClusterName",
+            "Values": Array [
+              Object {
+                "Ref": "Ec2Cluster796ACAF5",
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SSM::Association",
+    },
+    "AutoScalingGroupASG804C35BE": Object {
+      "CreationPolicy": Object {
+        "ResourceSignal": Object {
+          "Count": 1,
+          "Timeout": "PT7M",
+        },
+      },
+      "Properties": Object {
+        "DesiredCapacity": "1",
+        "LaunchTemplate": Object {
+          "LaunchTemplateId": Object {
+            "Ref": "AutoScalingGroupLaunchTemplate",
+          },
+          "Version": Object {
+            "Fn::GetAtt": Array [
+              "AutoScalingGroupLaunchTemplate",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "MaxSize": "1",
+        "MinSize": "1",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "PropagateAtLaunch": true,
+            "Value": "AutoScalingGroup",
+          },
+        ],
+        "VPCZoneIdentifier": Array [
+          Object {
+            "Ref": "VPCPrivateSubnet1Subnet8BCA10E0",
+          },
+          Object {
+            "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
+          },
+          Object {
+            "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
+          },
+        ],
+      },
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "UpdatePolicy": Object {
+        "AutoScalingRollingUpdate": Object {
+          "MaxBatchSize": 1,
+          "MinInstancesInService": 1,
+          "SuspendProcesses": Array [
+            "HealthCheck",
+            "ReplaceUnhealthy",
+            "AZRebalance",
+            "AlarmNotification",
+            "ScheduledActions",
+          ],
+          "WaitOnResourceSignals": true,
+        },
+      },
+    },
+    "AutoScalingGroupDrainECSHookFunctionB9B9F734": Object {
+      "DependsOn": Array [
+        "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
+        "AutoScalingGroupDrainECSHookFunctionServiceRole6EAC53AD",
+      ],
+      "Properties": Object {
+        "Code": Object {
+          "ZipFile": "import boto3, json, os, time
+
+ecs = boto3.client('ecs')
+autoscaling = boto3.client('autoscaling')
+
+
+def lambda_handler(event, context):
+  print(json.dumps(event))
+  cluster = os.environ['CLUSTER']
+  snsTopicArn = event['Records'][0]['Sns']['TopicArn']
+  lifecycle_event = json.loads(event['Records'][0]['Sns']['Message'])
+  instance_id = lifecycle_event.get('EC2InstanceId')
+  if not instance_id:
+    print('Got event without EC2InstanceId: %s', json.dumps(event))
+    return
+
+  instance_arn = container_instance_arn(cluster, instance_id)
+  print('Instance %s has container instance ARN %s' % (lifecycle_event['EC2InstanceId'], instance_arn))
+
+  if not instance_arn:
+    return
+
+  while has_tasks(cluster, instance_arn):
+    time.sleep(10)
+
+  try:
+    print('Terminating instance %s' % instance_id)
+    autoscaling.complete_lifecycle_action(
+        LifecycleActionResult='CONTINUE',
+        **pick(lifecycle_event, 'LifecycleHookName', 'LifecycleActionToken', 'AutoScalingGroupName'))
+  except Exception as e:
+    # Lifecycle action may have already completed.
+    print(str(e))
+
+
+def container_instance_arn(cluster, instance_id):
+  \\"\\"\\"Turn an instance ID into a container instance ARN.\\"\\"\\"
+  arns = ecs.list_container_instances(cluster=cluster, filter='ec2InstanceId==' + instance_id)['containerInstanceArns']
+  if not arns:
+    return None
+  return arns[0]
+
+
+def has_tasks(cluster, instance_arn):
+  \\"\\"\\"Return True if the instance is running tasks for the given cluster.\\"\\"\\"
+  instances = ecs.describe_container_instances(cluster=cluster, containerInstances=[instance_arn])['containerInstances']
+  if not instances:
+    return False
+  instance = instances[0]
+
+  if instance['status'] == 'ACTIVE':
+    # Start draining, then try again later
+    set_container_instance_to_draining(cluster, instance_arn)
+    return True
+
+  tasks = instance['runningTasksCount'] + instance['pendingTasksCount']
+  print('Instance %s has %s tasks' % (instance_arn, tasks))
+
+  return tasks > 0
+
+
+def set_container_instance_to_draining(cluster, instance_arn):
+  ecs.update_container_instances_state(
+      cluster=cluster,
+      containerInstances=[instance_arn], status='DRAINING')
+
+
+def pick(dct, *keys):
+  \\"\\"\\"Pick a subset of a dict.\\"\\"\\"
+  return {k: v for k, v in dct.items() if k in keys}
+",
+        },
+        "Environment": Object {
+          "Variables": Object {
+            "CLUSTER": Object {
+              "Ref": "Ec2Cluster796ACAF5",
+            },
+          },
+        },
+        "Handler": "index.lambda_handler",
+        "Role": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionServiceRole6EAC53AD",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.6",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+        "Timeout": 310,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "AutoScalingGroupDrainECSHookFunctionServiceRole6EAC53AD": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "lambda.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeInstanceStatus",
+                "ec2:DescribeHosts",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "autoscaling:CompleteLifecycleAction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":autoscaling:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":autoScalingGroup:*:autoScalingGroupName/",
+                    Object {
+                      "Ref": "AutoScalingGroupASG804C35BE",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "ecs:DescribeContainerInstances",
+                "ecs:DescribeTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:ListContainerInstances",
+                "ecs:SubmitContainerStateChange",
+                "ecs:SubmitTaskStateChange",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "Ec2Cluster796ACAF5",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
+        "Roles": Array [
+          Object {
+            "Ref": "AutoScalingGroupDrainECSHookFunctionServiceRole6EAC53AD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AutoScalingGroupDrainECSHookFunctionTopicCCDE854C": Object {
+      "Properties": Object {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "AutoScalingGroupDrainECSHookFunctionTopicSubscription528C8C7B": Object {
+      "Properties": Object {
+        "Endpoint": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Protocol": "lambda",
+        "TopicArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "AutoScalingGroupInstanceProfile342FAC7C": Object {
+      "Properties": Object {
+        "Roles": Array [
+          Object {
+            "Ref": "AutoScalingGroupInstanceRoleDC70D128",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "AutoScalingGroupInstanceRoleDC70D128": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "ec2.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AutoScalingGroupInstanceRoleDefaultPolicy3DF09528": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ecs:CreateCluster",
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:Submit*",
+                "ecr:GetAuthorizationToken",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "s3:Get*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "BucketToDeploy91F87F54",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "BucketToDeploy91F87F54",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AutoScalingGroupInstanceRoleDefaultPolicy3DF09528",
+        "Roles": Array [
+          Object {
+            "Ref": "AutoScalingGroupInstanceRoleDC70D128",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AutoScalingGroupInstanceSecurityGroup9D2E0C5E": Object {
+      "Properties": Object {
+        "GroupDescription": "AutoScalingGroup/InstanceSecurityGroup",
+        "SecurityGroupEgress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": Array [],
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "AutoScalingGroupLaunchConfigDEEB160C": Object {
+      "DependsOn": Array [
+        "AutoScalingGroupInstanceRoleDefaultPolicy3DF09528",
+        "AutoScalingGroupInstanceRoleDC70D128",
+      ],
+      "Properties": Object {
+        "IamInstanceProfile": Object {
+          "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
+        },
+        "ImageId": "",
+        "InstanceType": "t3.medium",
+        "SecurityGroups": Array [
+          Object {
+            "Fn::GetAtt": Array [
+              "AutoScalingGroupInstanceSecurityGroup9D2E0C5E",
+              "GroupId",
+            ],
+          },
+        ],
+        "UserData": Object {
+          "Fn::Base64": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "#!/bin/bash
+echo ECS_CLUSTER=",
+                Object {
+                  "Ref": "Ec2Cluster796ACAF5",
+                },
+                " >> /etc/ecs/ecs.config
+sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
+sudo service iptables save
+echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+              ],
+            ],
+          },
+        },
+      },
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+    },
+    "AutoScalingGroupLaunchTemplate": Object {
+      "Properties": Object {
+        "LaunchTemplateData": Object {
+          "IamInstanceProfile": Object {
+            "Name": Object {
+              "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
+            },
+          },
+          "ImageId": "",
+          "InstanceType": "t3.medium",
+          "SecurityGroupIds": Array [
+            Object {
+              "Fn::GetAtt": Array [
+                "AutoScalingGroupInstanceSecurityGroup9D2E0C5E",
+                "GroupId",
+              ],
+            },
+          ],
+          "TagSpecifications": Array [
+            Object {
+              "ResourceType": "instance",
+              "Tags": Array [
+                Object {
+                  "Key": "ClusterName",
+                  "Value": Object {
+                    "Ref": "Ec2Cluster796ACAF5",
+                  },
+                },
+              ],
+            },
+            Object {
+              "ResourceType": "volume",
+              "Tags": Array [
+                Object {
+                  "Key": "ClusterName",
+                  "Value": Object {
+                    "Ref": "Ec2Cluster796ACAF5",
+                  },
+                },
+              ],
+            },
+          ],
+          "UserData": Object {
+            "Fn::Base64": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  "#!/bin/sh
+yum update -y
+yum install -y aws-cfn-bootstrap aws-cli jq
+yum install -y https://amazon-ssm-",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ".s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+sed -i \\"/After=cloud-final.service/d\\" /usr/lib/systemd/system/ecs.service
+systemctl daemon-reload
+exec 2>>/var/log/ecs-agent-reload.log
+echo ECS_CLUSTER=",
+                  Object {
+                    "Ref": "Ec2Cluster796ACAF5",
+                  },
+                  " >> /etc/ecs/ecs.config
+cat << EOF >> /etc/ecs/ecs.config
+ECS_AVAILABLE_LOGGING_DRIVERS=[\\"json-file\\",\\"awslogs\\",\\"fluentd\\",\\"syslog\\",\\"journald\\",\\"gelf\\",\\"logentries\\",\\"splunk\\"]
+ECS_ENABLE_CONTAINER_METADATA=true
+ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=30m
+EOF
+instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+host_name=",
+                  Object {
+                    "Ref": "Ec2Cluster796ACAF5",
+                  },
+                  "--$(echo $instance_id)
+hostnamectl set-hostname $host_name
+aws ec2 create-tags --region ",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  " --resources $instance_id --tags Key=Name,Value=$host_name
+until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;
+container_instance_arn=$(echo \\"\${metadata}\\" | jq -er \\".ContainerInstanceArn\\")
+aws ec2 create-tags --region ",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
+/opt/aws/bin/cfn-signal -e $? --stack ",
+                  Object {
+                    "Ref": "AWS::StackName",
+                  },
+                  " --resource AutoScalingGroupASG804C35BE --region ",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                ],
+              ],
+            },
+          },
+        },
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "AutoScalingGroupLifecycleHookDrainHook2D105479": Object {
+      "DependsOn": Array [
+        "AutoScalingGroupLifecycleHookDrainHookRoleDefaultPolicy1F6E8540",
+        "AutoScalingGroupLifecycleHookDrainHookRoleC0BBF755",
+      ],
+      "Properties": Object {
+        "AutoScalingGroupName": Object {
+          "Ref": "AutoScalingGroupASG804C35BE",
+        },
+        "DefaultResult": "CONTINUE",
+        "HeartbeatTimeout": 300,
+        "LifecycleTransition": "autoscaling:EC2_INSTANCE_TERMINATING",
+        "NotificationTargetARN": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+        "RoleARN": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupLifecycleHookDrainHookRoleC0BBF755",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::AutoScaling::LifecycleHook",
+    },
+    "AutoScalingGroupLifecycleHookDrainHookRoleC0BBF755": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "autoscaling.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AutoScalingGroupLifecycleHookDrainHookRoleDefaultPolicy1F6E8540": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AutoScalingGroupLifecycleHookDrainHookRoleDefaultPolicy1F6E8540",
+        "Roles": Array [
+          Object {
+            "Ref": "AutoScalingGroupLifecycleHookDrainHookRoleC0BBF755",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Type": "AWS::SNS::Topic",
+    },
+    "BucketDeploymentCustomResourceCB7E2133": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "DestinationBucketKeyPrefix": "examples/",
+        "DestinationBucketName": Object {
+          "Ref": "BucketToDeploy91F87F54",
+        },
+        "ServiceToken": Object {
+          "Fn::GetAtt": Array [
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+            "Arn",
+          ],
+        },
+        "SourceBucketName": Object {
+          "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+        },
+        "SourceObjectKey": Object {
+          "Fn::Join": Array [
+            "",
+            Array [
+              Object {
+                "Fn::Select": Array [
+                  0,
+                  Object {
+                    "Fn::Split": Array [
+                      "||",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
+                      },
+                    ],
+                  },
+                ],
+              },
+              Object {
+                "Fn::Select": Array [
+                  1,
+                  Object {
+                    "Fn::Split": Array [
+                      "||",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "Custom::CDKBucketDeployment",
+    },
+    "BucketToDeploy91F87F54": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "PublicAccessBlockConfiguration": Object {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+    },
+    "CloudTrailToDeploy3F1E66BD": Object {
+      "DependsOn": Array [
+        "CloudTrailToDeployS3Policy3F1D1743",
+      ],
+      "Properties": Object {
+        "EnableLogFileValidation": false,
+        "EventSelectors": Array [
+          Object {
+            "IncludeManagementEvents": true,
+            "ReadWriteType": "WriteOnly",
+          },
+          Object {
+            "DataResources": Array [
+              Object {
+                "Type": "AWS::S3::Object",
+                "Values": Array [
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        Object {
+                          "Fn::GetAtt": Array [
+                            "BucketToDeploy91F87F54",
+                            "Arn",
+                          ],
+                        },
+                        "/",
+                      ],
+                    ],
+                  },
+                ],
+              },
+            ],
+            "ReadWriteType": "WriteOnly",
+          },
+        ],
+        "IncludeGlobalServiceEvents": false,
+        "IsLogging": true,
+        "IsMultiRegionTrail": false,
+        "S3BucketName": Object {
+          "Ref": "CloudTrailToDeployS385FF9393",
+        },
+      },
+      "Type": "AWS::CloudTrail::Trail",
+    },
+    "CloudTrailToDeployS385FF9393": Object {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::S3::Bucket",
+    },
+    "CloudTrailToDeployS3Policy3F1D1743": Object {
+      "Properties": Object {
+        "Bucket": Object {
+          "Ref": "CloudTrailToDeployS385FF9393",
+        },
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "s3:GetBucketAcl",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "cloudtrail.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "CloudTrailToDeployS385FF9393",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": "s3:PutObject",
+              "Condition": Object {
+                "StringEquals": Object {
+                  "s3:x-amz-acl": "bucket-owner-full-control",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "cloudtrail.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::GetAtt": Array [
+                        "CloudTrailToDeployS385FF9393",
+                        "Arn",
+                      ],
+                    },
+                    "/AWSLogs/",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": Object {
+      "DependsOn": Array [
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      ],
+      "Properties": Object {
+        "Code": Object {
+          "S3Bucket": Object {
+            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7",
+          },
+          "S3Key": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                Object {
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                Object {
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "Handler": "index.handler",
+        "Role": Object {
+          "Fn::GetAtt": Array [
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.6",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "lambda.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                      },
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "BucketToDeploy91F87F54",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "BucketToDeploy91F87F54",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "Roles": Array [
+          Object {
+            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DeployCommands": Object {
+      "Properties": Object {
+        "Content": Object {
+          "description": "document",
+          "mainSteps": Array [
+            Object {
+              "action": "aws:runShellScript",
+              "inputs": Object {
+                "runCommand": Array [
+                  "set -eux",
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        "aws --region ",
+                        Object {
+                          "Ref": "AWS::Region",
+                        },
+                        " s3 sync --delete --exact-timestamps s3://",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/ ",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/",
+                      ],
+                    ],
+                  },
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        "cd ",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/",
+                      ],
+                    ],
+                  },
+                  "chmod -R +x bin/",
+                  "find bin/ -type f | xargs -n 1 bash",
+                ],
+                "timeoutSeconds": "60",
+                "workingDirectory": "/home/ec2-user",
+              },
+              "name": "runShellScript",
+            },
+          ],
+          "schemaVersion": "2.2",
+        },
+        "DocumentType": "Command",
+      },
+      "Type": "AWS::SSM::Document",
+    },
+    "Ec2Cluster796ACAF5": Object {
+      "Type": "AWS::ECS::Cluster",
+    },
+    "EventRoleForAutoDeploy7E0815A5": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "events.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventRoleForAutoDeployDefaultPolicyF7A3A198": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:ssm:",
+                      Object {
+                        "Ref": "AWS::Region",
+                      },
+                      ":*:document/*",
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:ec2:",
+                      Object {
+                        "Ref": "AWS::Region",
+                      },
+                      ":*:instance/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventRoleForAutoDeployDefaultPolicyF7A3A198",
+        "Roles": Array [
+          Object {
+            "Ref": "EventRoleForAutoDeploy7E0815A5",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Resource": Object {
+      "Properties": Object {
+        "ApplicationSource": Object {
+          "TagFilters": Array [
+            Object {
+              "Key": "ClusterName",
+              "Values": Array [
+                Object {
+                  "Ref": "Ec2Cluster796ACAF5",
+                },
+              ],
+            },
+          ],
+        },
+        "ScalingInstructions": Array [
+          Object {
+            "MaxCapacity": 1,
+            "MinCapacity": 1,
+            "ResourceId": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  "autoScalingGroup/",
+                  Object {
+                    "Ref": "AutoScalingGroupASG804C35BE",
+                  },
+                ],
+              ],
+            },
+            "ScalableDimension": "autoscaling:autoScalingGroup:DesiredCapacity",
+            "ScalingPolicyUpdateBehavior": "ReplaceExternalPolicies",
+            "ServiceNamespace": "autoscaling",
+            "TargetTrackingConfigurations": Array [
+              Object {
+                "EstimatedInstanceWarmup": 300,
+                "PredefinedScalingMetricSpecification": Object {
+                  "PredefinedScalingMetricType": "ASGAverageCPUUtilization",
+                },
+                "TargetValue": 50,
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::AutoScalingPlans::ScalingPlan",
+    },
+    "RuleToAutoDeploy2C2BF89A": Object {
+      "Properties": Object {
+        "EventPattern": Object {
+          "detail": Object {
+            "eventName": Array [
+              "PutObject",
+            ],
+            "eventSource": Array [
+              "s3.amazonaws.com",
+            ],
+            "requestParameters": Object {
+              "bucketName": Array [
+                Object {
+                  "Ref": "BucketToDeploy91F87F54",
+                },
+              ],
+            },
+          },
+          "detail-type": Array [
+            "AWS API Call via CloudTrail",
+          ],
+          "source": Array [
+            "aws.s3",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": Array [
+          Object {
+            "Arn": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  "arn:aws:ssm:",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  Object {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":document/",
+                  Object {
+                    "Ref": "DeployCommands",
+                  },
+                ],
+              ],
+            },
+            "Id": "--Token-TOKEN.215--",
+            "RoleArn": Object {
+              "Fn::GetAtt": Array [
+                "EventRoleForAutoDeploy7E0815A5",
+                "Arn",
+              ],
+            },
+            "RunCommandParameters": Object {
+              "RunCommandTargets": Array [
+                Object {
+                  "Key": "tag:ClusterName",
+                  "Values": Array [
+                    Object {
+                      "Ref": "Ec2Cluster796ACAF5",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "VPCB9E5F0B4": Object {
+      "Properties": Object {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "VPCIGWB7E252D3": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::InternetGateway",
+    },
+    "VPCPrivateSubnet1DefaultRouteAE1D6490": Object {
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": Object {
+          "Ref": "VPCPublicSubnet1NATGatewayE0556630",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet1RouteTableBE8A6027",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPrivateSubnet1RouteTableAssociation347902D1": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet1RouteTableBE8A6027",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPrivateSubnet1Subnet8BCA10E0",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPrivateSubnet1RouteTableBE8A6027": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet1",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPrivateSubnet1Subnet8BCA10E0": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1a",
+        "CidrBlock": "10.0.96.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet1",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCPrivateSubnet2DefaultRouteF4F5CFD2": Object {
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": Object {
+          "Ref": "VPCPublicSubnet2NATGateway3C070193",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet2RouteTable0A19E10E",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPrivateSubnet2RouteTable0A19E10E": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet2",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPrivateSubnet2RouteTableAssociation0C73D413": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet2RouteTable0A19E10E",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPrivateSubnet2SubnetCFCDAA7A": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1b",
+        "CidrBlock": "10.0.128.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet2",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCPrivateSubnet3DefaultRoute27F311AE": Object {
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": Object {
+          "Ref": "VPCPublicSubnet3NATGatewayD3048F5C",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPrivateSubnet3RouteTable192186F8": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet3",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPrivateSubnet3RouteTableAssociationC28D144E": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPrivateSubnet3Subnet3EDCD457": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1c",
+        "CidrBlock": "10.0.160.0/19",
+        "MapPublicIpOnLaunch": false,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PrivateSubnet3",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCPublicSubnet1DefaultRoute91CEF279": Object {
+      "DependsOn": Array [
+        "VPCVPCGW99B986DC",
+      ],
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": Object {
+          "Ref": "VPCIGWB7E252D3",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet1RouteTableFEE4B781",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPublicSubnet1EIP6AD938E8": Object {
+      "Properties": Object {
+        "Domain": "vpc",
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "VPCPublicSubnet1NATGatewayE0556630": Object {
+      "Properties": Object {
+        "AllocationId": Object {
+          "Fn::GetAtt": Array [
+            "VPCPublicSubnet1EIP6AD938E8",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet1SubnetB4246D30",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "VPCPublicSubnet1RouteTableAssociation0B0896DC": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet1RouteTableFEE4B781",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet1SubnetB4246D30",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPublicSubnet1RouteTableFEE4B781": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPublicSubnet1SubnetB4246D30": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1a",
+        "CidrBlock": "10.0.0.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCPublicSubnet2DefaultRouteB7481BBA": Object {
+      "DependsOn": Array [
+        "VPCVPCGW99B986DC",
+      ],
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": Object {
+          "Ref": "VPCIGWB7E252D3",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet2RouteTable6F1A15F1",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPublicSubnet2EIP4947BC00": Object {
+      "Properties": Object {
+        "Domain": "vpc",
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "VPCPublicSubnet2NATGateway3C070193": Object {
+      "Properties": Object {
+        "AllocationId": Object {
+          "Fn::GetAtt": Array [
+            "VPCPublicSubnet2EIP4947BC00",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet2Subnet74179F39",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "VPCPublicSubnet2RouteTable6F1A15F1": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPublicSubnet2RouteTableAssociation5A808732": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet2RouteTable6F1A15F1",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet2Subnet74179F39",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPublicSubnet2Subnet74179F39": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1b",
+        "CidrBlock": "10.0.32.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCPublicSubnet3DefaultRouteA0D29D46": Object {
+      "DependsOn": Array [
+        "VPCVPCGW99B986DC",
+      ],
+      "Properties": Object {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": Object {
+          "Ref": "VPCIGWB7E252D3",
+        },
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "VPCPublicSubnet3EIPAD4BC883": Object {
+      "Properties": Object {
+        "Domain": "vpc",
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "VPCPublicSubnet3NATGatewayD3048F5C": Object {
+      "Properties": Object {
+        "AllocationId": Object {
+          "Fn::GetAtt": Array [
+            "VPCPublicSubnet3EIPAD4BC883",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet3Subnet631C5E25",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet3",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "VPCPublicSubnet3RouteTable98AE0E14": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet3",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "VPCPublicSubnet3RouteTableAssociation427FE0C6": Object {
+      "Properties": Object {
+        "RouteTableId": Object {
+          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
+        },
+        "SubnetId": Object {
+          "Ref": "VPCPublicSubnet3Subnet631C5E25",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "VPCPublicSubnet3Subnet631C5E25": Object {
+      "Properties": Object {
+        "AvailabilityZone": "dummy1c",
+        "CidrBlock": "10.0.64.0/19",
+        "MapPublicIpOnLaunch": true,
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet3",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          Object {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "VPCVPCGW99B986DC": Object {
+      "Properties": Object {
+        "InternetGatewayId": Object {
+          "Ref": "VPCIGWB7E252D3",
+        },
+        "VpcId": Object {
+          "Ref": "VPCB9E5F0B4",
+        },
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+    },
+  },
+}
+`;
