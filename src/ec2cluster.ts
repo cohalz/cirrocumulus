@@ -77,9 +77,8 @@ export interface ClusterProps {
 
 export class Ec2Cluster extends Construct {
   public readonly cluster: Cluster
-  public autoScalingGroupName: string
-  public instanceRole: Role
-  public onDemandOnly: boolean
+  public autoScalingGroup: AutoScalingGroup
+  private readonly onDemandOnly: boolean
 
   constructor(scope: Construct, id: string, props: ClusterProps) {
     super(scope, id)
@@ -98,30 +97,32 @@ export class Ec2Cluster extends Construct {
       this.onDemandOnly = false
     }
 
-    const asg = this.createAutoScalingGroup(
+    this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
+
+    const ami = new EcsOptimizedAmi({
+      generation: AmazonLinuxGeneration.AmazonLinux2,
+    })
+
+    const launchTemplate = this.createLaunchTemplate(
       scope,
-      this.cluster.clusterName,
-      props.vpc,
-      props
+      ami,
+      props.instanceTypes[0],
+      props.tags,
+      props.userData
     )
 
-    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
+    this.useLaunchTemplate(
+      launchTemplate,
+      props.instanceTypes,
+      props.onDemandPercentage
+    )
 
-    this.addCfnPolicy(asg, props.minCapacity)
+    this.addCfnPolicy(props.minCapacity)
 
-    this.autoScalingGroupName = cfnAsg.refAsString
-
-    this.instanceRole = asg.node.findChild("InstanceRole") as Role
-
-    this.cluster.addAutoScalingGroup(asg)
+    this.cluster.addAutoScalingGroup(this.autoScalingGroup)
   }
 
-  private createAutoScalingGroup = (
-    scope: Construct,
-    clusterName: string,
-    vpc: IVpc,
-    props: ClusterProps
-  ) => {
+  private createAutoScalingGroup = (scope: Construct, props: ClusterProps) => {
     if (this.onDemandOnly && props.instanceTypes.length > 1) {
       throw new Error(
         "When using on-demand instances, please set single instance type."
@@ -137,68 +138,45 @@ export class Ec2Cluster extends Construct {
       generation: AmazonLinuxGeneration.AmazonLinux2,
     })
 
-    const asg = new AutoScalingGroup(scope, "AutoScalingGroup", {
+    return new AutoScalingGroup(scope, "AutoScalingGroup", {
       desiredCapacity: props.desiredCapacity,
       instanceType: new InstanceType(props.instanceTypes[0]),
       machineImage: ami,
       maxCapacity: props.maxCapacity,
       minCapacity: props.minCapacity,
       updateType: UpdateType.ReplacingUpdate,
-      vpc,
+      vpc: props.vpc,
     })
-
-    const launchTemplate = this.createLaunchTemplate(
-      scope,
-      clusterName,
-      asg,
-      ami,
-      props.instanceTypes[0],
-      props.tags,
-      props.userData
-    )
-
-    this.useLaunchTemplate(
-      asg,
-      launchTemplate,
-      props.instanceTypes,
-      props.onDemandPercentage
-    )
-
-    return asg
   }
 
   private createLaunchTemplate(
     scope: Construct,
-    clusterName: string,
-    asg: AutoScalingGroup,
     ami: EcsOptimizedAmi,
     instanceType: string,
     tags2?: { [key: string]: string },
     userData2?: string[]
   ) {
-    this.instanceRole = asg.node.findChild("InstanceRole") as Role
+    const cfnAsg = this.autoScalingGroup.node.findChild(
+      "ASG"
+    ) as CfnAutoScalingGroup
 
-    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
-
-    this.autoScalingGroupName = cfnAsg.refAsString
-
-    const cfnInstanceProfile = asg.node.findChild(
+    const cfnInstanceProfile = this.autoScalingGroup.node.findChild(
       "InstanceProfile"
     ) as CfnInstanceProfile
 
-    const securityGroup = asg.node.findChild(
+    const securityGroup = this.autoScalingGroup.node.findChild(
       "InstanceSecurityGroup"
     ) as SecurityGroup
 
     const instancePolicy = new PolicyStatement()
     instancePolicy.addActions("ec2:CreateTags", "ec2:DescribeInstances")
     instancePolicy.addAllResources()
-    this.instanceRole.addToPolicy(instancePolicy)
+    this.autoScalingGroup.addToRolePolicy(instancePolicy)
 
     const tags = [
       {
         key: "ClusterName",
-        value: clusterName,
+        value: this.cluster.clusterName,
       },
     ]
 
@@ -209,7 +187,7 @@ export class Ec2Cluster extends Construct {
     }
 
     const userData = this.configureUserData(
-      clusterName,
+      this.cluster.clusterName,
       cfnAsg.logicalId,
       userData2
     )
@@ -291,8 +269,10 @@ export class Ec2Cluster extends Construct {
     )
   }
 
-  private addCfnPolicy = (asg: AutoScalingGroup, minCapacity?: number) => {
-    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
+  private addCfnPolicy = (minCapacity?: number) => {
+    const cfnAsg = this.autoScalingGroup.node.findChild(
+      "ASG"
+    ) as CfnAutoScalingGroup
 
     cfnAsg.options.creationPolicy = {
       resourceSignal: {
@@ -318,12 +298,13 @@ export class Ec2Cluster extends Construct {
   }
 
   private useLaunchTemplate = (
-    asg: AutoScalingGroup,
     launchTemplate: CfnLaunchTemplate,
     instanceTypes: string[],
     onDemandPercentage?: number
   ) => {
-    const cfnAsg = asg.node.findChild("ASG") as CfnAutoScalingGroup
+    const cfnAsg = this.autoScalingGroup.node.findChild(
+      "ASG"
+    ) as CfnAutoScalingGroup
 
     // XXX https://github.com/awslabs/aws-cdk/issues/1408
     cfnAsg.addPropertyDeletionOverride("LaunchConfigurationName")
