@@ -150,10 +150,11 @@ export class Ec2Cluster extends Construct {
     const launchTemplate = this.createLaunchTemplate(
       scope,
       clusterName,
-      vpc,
-      props,
       asg,
-      ami
+      ami,
+      props.instanceTypes[0],
+      props.tags,
+      props.userData
     )
 
     this.useLaunchTemplate(
@@ -169,10 +170,11 @@ export class Ec2Cluster extends Construct {
   private createLaunchTemplate(
     scope: Construct,
     clusterName: string,
-    vpc: IVpc,
-    props: ClusterProps,
     asg: AutoScalingGroup,
-    ami: EcsOptimizedAmi
+    ami: EcsOptimizedAmi,
+    instanceType: string,
+    tags2?: { [key: string]: string },
+    userData2?: string[]
   ) {
     this.instanceRole = asg.node.findChild("InstanceRole") as Role
 
@@ -200,16 +202,16 @@ export class Ec2Cluster extends Construct {
       },
     ]
 
-    if (props.tags) {
-      for (const key of Object.keys(props.tags)) {
-        tags.push({ key, value: props.tags[key] })
+    if (tags2) {
+      for (const key of Object.keys(tags2)) {
+        tags.push({ key, value: tags2[key] })
       }
     }
 
     const userData = this.configureUserData(
       clusterName,
       cfnAsg.logicalId,
-      props.userData
+      userData2
     )
 
     const launchTemplate = new CfnLaunchTemplate(
@@ -219,7 +221,7 @@ export class Ec2Cluster extends Construct {
         launchTemplateData: {
           iamInstanceProfile: { name: cfnInstanceProfile.refAsString },
           imageId: ami.getImage(scope).imageId,
-          instanceType: props.instanceTypes[0],
+          instanceType,
           securityGroupIds: [securityGroup.securityGroupId],
           tagSpecifications: [
             {
