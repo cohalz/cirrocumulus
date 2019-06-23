@@ -14,7 +14,7 @@ import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/cdk"
 
-export interface ClusterProps
+export interface Ec2ClusterProps
   extends Pick<
     AutoScalingGroupProps,
     Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
@@ -59,7 +59,7 @@ export class Ec2Cluster extends Construct {
   public readonly cluster: Cluster
   private readonly onDemandOnly: boolean
 
-  constructor(scope: Construct, id: string, props: ClusterProps) {
+  constructor(scope: Construct, id: string, props: Ec2ClusterProps) {
     super(scope, id)
 
     this.cluster = new Cluster(this, "Cluster", {
@@ -100,7 +100,10 @@ export class Ec2Cluster extends Construct {
     this.cluster.addAutoScalingGroup(this.autoScalingGroup)
   }
 
-  private createAutoScalingGroup = (scope: Construct, props: ClusterProps) => {
+  private createAutoScalingGroup = (
+    scope: Construct,
+    props: Ec2ClusterProps
+  ) => {
     if (this.onDemandOnly && props.instanceTypes.length > 1) {
       throw new Error(
         "When using on-demand instances, please set single instance type."
