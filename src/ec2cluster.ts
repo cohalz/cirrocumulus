@@ -5,6 +5,7 @@ import {
   UpdateType,
 } from "@aws-cdk/aws-autoscaling"
 import {
+  AmazonLinuxImage,
   CfnLaunchTemplate,
   InstanceType,
   SecurityGroup,
@@ -13,7 +14,6 @@ import {
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
-import { DummyImage } from "./lib/dummy-image"
 
 export interface Ec2ClusterProps
   extends Pick<
@@ -116,7 +116,7 @@ export class Ec2Cluster extends Construct {
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
       instanceType: new InstanceType(props.instanceTypes[0]),
-      machineImage: new DummyImage(),
+      machineImage: new AmazonLinuxImage(),
       updateType: UpdateType.REPLACING_UPDATE,
       ...props,
     })
