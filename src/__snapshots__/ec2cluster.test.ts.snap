@@ -2,6 +2,12 @@
 
 exports[`ec2cluster can set OnDemandPercentageAboveBaseCapacity for the spot instance 1`] = `
 Object {
+  "Parameters": Object {
+    "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
   "Resources": Object {
     "AutoScalingGroupASG804C35BE": Object {
       "CreationPolicy": Object {
@@ -54,9 +60,6 @@ Object {
           Object {
             "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
           },
-          Object {
-            "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
-          },
         ],
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -313,21 +316,6 @@ def pick(dct, *keys):
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicSubscription528C8C7B": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
         "Roles": Array [
@@ -476,7 +464,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
             },
           },
-          "ImageId": "",
+          "ImageId": Object {
+            "Ref": "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter",
+          },
           "InstanceType": "t3.medium",
           "SecurityGroupIds": Array [
             Object {
@@ -555,6 +545,7 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
+
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -648,6 +639,21 @@ aws ec2 create-tags --region ",
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
     },
+    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
+      "Properties": Object {
+        "Endpoint": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Protocol": "lambda",
+        "TopicArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
     },
@@ -716,8 +722,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet1Subnet8BCA10E0": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.96.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.128.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
@@ -778,75 +791,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet2SubnetCFCDAA7A": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.128.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.192.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PrivateSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Private",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Private",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPrivateSubnet3DefaultRoute27F311AE": Object {
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": Object {
-          "Ref": "VPCPublicSubnet3NATGatewayD3048F5C",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPrivateSubnet3RouteTable192186F8": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPrivateSubnet3RouteTableAssociationC28D144E": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPrivateSubnet3Subnet3EDCD457": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.160.0/19",
-        "MapPublicIpOnLaunch": false,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -931,8 +889,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet1SubnetB4246D30": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.0.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
@@ -1022,104 +987,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet2Subnet74179F39": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.32.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.64.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PublicSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPublicSubnet3DefaultRouteA0D29D46": Object {
-      "DependsOn": Array [
-        "VPCVPCGW99B986DC",
-      ],
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": Object {
-          "Ref": "VPCIGWB7E252D3",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPublicSubnet3EIPAD4BC883": Object {
-      "Properties": Object {
-        "Domain": "vpc",
-      },
-      "Type": "AWS::EC2::EIP",
-    },
-    "VPCPublicSubnet3NATGatewayD3048F5C": Object {
-      "Properties": Object {
-        "AllocationId": Object {
-          "Fn::GetAtt": Array [
-            "VPCPublicSubnet3EIPAD4BC883",
-            "AllocationId",
-          ],
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-      },
-      "Type": "AWS::EC2::NatGateway",
-    },
-    "VPCPublicSubnet3RouteTable98AE0E14": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPublicSubnet3RouteTableAssociation427FE0C6": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPublicSubnet3Subnet631C5E25": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.64.0/19",
-        "MapPublicIpOnLaunch": true,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -1153,6 +1034,12 @@ aws ec2 create-tags --region ",
 
 exports[`ec2cluster can set UserData 1`] = `
 Object {
+  "Parameters": Object {
+    "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
   "Resources": Object {
     "AutoScalingGroupASG804C35BE": Object {
       "CreationPolicy": Object {
@@ -1189,9 +1076,6 @@ Object {
           },
           Object {
             "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
-          },
-          Object {
-            "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
           },
         ],
       },
@@ -1449,21 +1333,6 @@ def pick(dct, *keys):
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicSubscription528C8C7B": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
         "Roles": Array [
@@ -1588,7 +1457,8 @@ def pick(dct, *keys):
             "Fn::Join": Array [
               "",
               Array [
-                "#!/bin/bash
+                "
+echo 1
 echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
@@ -1612,7 +1482,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
             },
           },
-          "ImageId": "",
+          "ImageId": Object {
+            "Ref": "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter",
+          },
           "InstanceType": "t3.medium",
           "SecurityGroupIds": Array [
             Object {
@@ -1691,7 +1563,7 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-echo 1
+[object Object]
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -1785,6 +1657,21 @@ echo 1
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
     },
+    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
+      "Properties": Object {
+        "Endpoint": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Protocol": "lambda",
+        "TopicArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
     },
@@ -1853,8 +1740,15 @@ echo 1
     },
     "VPCPrivateSubnet1Subnet8BCA10E0": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.96.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.128.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
@@ -1915,75 +1809,20 @@ echo 1
     },
     "VPCPrivateSubnet2SubnetCFCDAA7A": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.128.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.192.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PrivateSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Private",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Private",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPrivateSubnet3DefaultRoute27F311AE": Object {
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": Object {
-          "Ref": "VPCPublicSubnet3NATGatewayD3048F5C",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPrivateSubnet3RouteTable192186F8": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPrivateSubnet3RouteTableAssociationC28D144E": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPrivateSubnet3Subnet3EDCD457": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.160.0/19",
-        "MapPublicIpOnLaunch": false,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -2068,8 +1907,15 @@ echo 1
     },
     "VPCPublicSubnet1SubnetB4246D30": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.0.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
@@ -2159,104 +2005,20 @@ echo 1
     },
     "VPCPublicSubnet2Subnet74179F39": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.32.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.64.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PublicSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPublicSubnet3DefaultRouteA0D29D46": Object {
-      "DependsOn": Array [
-        "VPCVPCGW99B986DC",
-      ],
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": Object {
-          "Ref": "VPCIGWB7E252D3",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPublicSubnet3EIPAD4BC883": Object {
-      "Properties": Object {
-        "Domain": "vpc",
-      },
-      "Type": "AWS::EC2::EIP",
-    },
-    "VPCPublicSubnet3NATGatewayD3048F5C": Object {
-      "Properties": Object {
-        "AllocationId": Object {
-          "Fn::GetAtt": Array [
-            "VPCPublicSubnet3EIPAD4BC883",
-            "AllocationId",
-          ],
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-      },
-      "Type": "AWS::EC2::NatGateway",
-    },
-    "VPCPublicSubnet3RouteTable98AE0E14": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPublicSubnet3RouteTableAssociation427FE0C6": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPublicSubnet3Subnet631C5E25": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.64.0/19",
-        "MapPublicIpOnLaunch": true,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -2290,6 +2052,12 @@ echo 1
 
 exports[`ec2cluster can set tags 1`] = `
 Object {
+  "Parameters": Object {
+    "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
   "Resources": Object {
     "AutoScalingGroupASG804C35BE": Object {
       "CreationPolicy": Object {
@@ -2326,9 +2094,6 @@ Object {
           },
           Object {
             "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
-          },
-          Object {
-            "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
           },
         ],
       },
@@ -2586,21 +2351,6 @@ def pick(dct, *keys):
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicSubscription528C8C7B": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
         "Roles": Array [
@@ -2749,7 +2499,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
             },
           },
-          "ImageId": "",
+          "ImageId": Object {
+            "Ref": "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter",
+          },
           "InstanceType": "t3.medium",
           "SecurityGroupIds": Array [
             Object {
@@ -2852,6 +2604,7 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
+
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -2945,6 +2698,21 @@ aws ec2 create-tags --region ",
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
     },
+    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
+      "Properties": Object {
+        "Endpoint": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Protocol": "lambda",
+        "TopicArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
     },
@@ -3013,8 +2781,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet1Subnet8BCA10E0": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.96.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.128.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
@@ -3075,75 +2850,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet2SubnetCFCDAA7A": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.128.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.192.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PrivateSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Private",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Private",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPrivateSubnet3DefaultRoute27F311AE": Object {
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": Object {
-          "Ref": "VPCPublicSubnet3NATGatewayD3048F5C",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPrivateSubnet3RouteTable192186F8": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPrivateSubnet3RouteTableAssociationC28D144E": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPrivateSubnet3Subnet3EDCD457": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.160.0/19",
-        "MapPublicIpOnLaunch": false,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -3228,8 +2948,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet1SubnetB4246D30": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.0.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
@@ -3319,104 +3046,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet2Subnet74179F39": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.32.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.64.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PublicSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPublicSubnet3DefaultRouteA0D29D46": Object {
-      "DependsOn": Array [
-        "VPCVPCGW99B986DC",
-      ],
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": Object {
-          "Ref": "VPCIGWB7E252D3",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPublicSubnet3EIPAD4BC883": Object {
-      "Properties": Object {
-        "Domain": "vpc",
-      },
-      "Type": "AWS::EC2::EIP",
-    },
-    "VPCPublicSubnet3NATGatewayD3048F5C": Object {
-      "Properties": Object {
-        "AllocationId": Object {
-          "Fn::GetAtt": Array [
-            "VPCPublicSubnet3EIPAD4BC883",
-            "AllocationId",
-          ],
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-      },
-      "Type": "AWS::EC2::NatGateway",
-    },
-    "VPCPublicSubnet3RouteTable98AE0E14": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPublicSubnet3RouteTableAssociation427FE0C6": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPublicSubnet3Subnet631C5E25": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.64.0/19",
-        "MapPublicIpOnLaunch": true,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -3450,6 +3093,12 @@ aws ec2 create-tags --region ",
 
 exports[`ec2cluster default 1`] = `
 Object {
+  "Parameters": Object {
+    "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
   "Resources": Object {
     "AutoScalingGroupASG804C35BE": Object {
       "CreationPolicy": Object {
@@ -3486,9 +3135,6 @@ Object {
           },
           Object {
             "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A",
-          },
-          Object {
-            "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
           },
         ],
       },
@@ -3746,21 +3392,6 @@ def pick(dct, *keys):
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicSubscription528C8C7B": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
         "Roles": Array [
@@ -3909,7 +3540,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
             },
           },
-          "ImageId": "",
+          "ImageId": Object {
+            "Ref": "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter",
+          },
           "InstanceType": "t3.medium",
           "SecurityGroupIds": Array [
             Object {
@@ -3988,6 +3621,7 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
+
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -4081,6 +3715,21 @@ aws ec2 create-tags --region ",
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
     },
+    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
+      "Properties": Object {
+        "Endpoint": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Protocol": "lambda",
+        "TopicArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
     },
@@ -4149,8 +3798,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet1Subnet8BCA10E0": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.96.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.128.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
@@ -4211,75 +3867,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPrivateSubnet2SubnetCFCDAA7A": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.128.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.192.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PrivateSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Private",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Private",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPrivateSubnet3DefaultRoute27F311AE": Object {
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": Object {
-          "Ref": "VPCPublicSubnet3NATGatewayD3048F5C",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPrivateSubnet3RouteTable192186F8": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPrivateSubnet3RouteTableAssociationC28D144E": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPrivateSubnet3RouteTable192186F8",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPrivateSubnet3Subnet3EDCD457",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPrivateSubnet3Subnet3EDCD457": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.160.0/19",
-        "MapPublicIpOnLaunch": false,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PrivateSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",
@@ -4364,8 +3965,15 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet1SubnetB4246D30": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1a",
-        "CidrBlock": "10.0.0.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            0,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
@@ -4455,104 +4063,20 @@ aws ec2 create-tags --region ",
     },
     "VPCPublicSubnet2Subnet74179F39": Object {
       "Properties": Object {
-        "AvailabilityZone": "dummy1b",
-        "CidrBlock": "10.0.32.0/19",
+        "AvailabilityZone": Object {
+          "Fn::Select": Array [
+            1,
+            Object {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.64.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": Array [
           Object {
             "Key": "Name",
             "Value": "VPC/PublicSubnet2",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public",
-          },
-          Object {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::Subnet",
-    },
-    "VPCPublicSubnet3DefaultRouteA0D29D46": Object {
-      "DependsOn": Array [
-        "VPCVPCGW99B986DC",
-      ],
-      "Properties": Object {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": Object {
-          "Ref": "VPCIGWB7E252D3",
-        },
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-      },
-      "Type": "AWS::EC2::Route",
-    },
-    "VPCPublicSubnet3EIPAD4BC883": Object {
-      "Properties": Object {
-        "Domain": "vpc",
-      },
-      "Type": "AWS::EC2::EIP",
-    },
-    "VPCPublicSubnet3NATGatewayD3048F5C": Object {
-      "Properties": Object {
-        "AllocationId": Object {
-          "Fn::GetAtt": Array [
-            "VPCPublicSubnet3EIPAD4BC883",
-            "AllocationId",
-          ],
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-      },
-      "Type": "AWS::EC2::NatGateway",
-    },
-    "VPCPublicSubnet3RouteTable98AE0E14": Object {
-      "Properties": Object {
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VPCB9E5F0B4",
-        },
-      },
-      "Type": "AWS::EC2::RouteTable",
-    },
-    "VPCPublicSubnet3RouteTableAssociation427FE0C6": Object {
-      "Properties": Object {
-        "RouteTableId": Object {
-          "Ref": "VPCPublicSubnet3RouteTable98AE0E14",
-        },
-        "SubnetId": Object {
-          "Ref": "VPCPublicSubnet3Subnet631C5E25",
-        },
-      },
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    },
-    "VPCPublicSubnet3Subnet631C5E25": Object {
-      "Properties": Object {
-        "AvailabilityZone": "dummy1c",
-        "CidrBlock": "10.0.64.0/19",
-        "MapPublicIpOnLaunch": true,
-        "Tags": Array [
-          Object {
-            "Key": "Name",
-            "Value": "VPC/PublicSubnet3",
           },
           Object {
             "Key": "aws-cdk:subnet-name",

@@ -1,6 +1,6 @@
 import { SynthUtils } from "@aws-cdk/assert"
 import { Role, ServicePrincipal } from "@aws-cdk/aws-iam"
-import { Stack } from "@aws-cdk/cdk"
+import { Stack } from "@aws-cdk/core"
 
 import { DeployFiles } from "./deployfiles"
 

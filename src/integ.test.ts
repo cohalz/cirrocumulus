@@ -1,7 +1,7 @@
 import { SynthUtils } from "@aws-cdk/assert"
 import { Vpc } from "@aws-cdk/aws-ec2"
 import { Role } from "@aws-cdk/aws-iam"
-import { Stack } from "@aws-cdk/cdk"
+import { Stack } from "@aws-cdk/core"
 
 import { DeployFiles } from "./deployfiles"
 import { Ec2Cluster } from "./ec2cluster"
