@@ -3,6 +3,10 @@
 exports[`ec2cluster can set OnDemandPercentageAboveBaseCapacity for the spot instance 1`] = `
 Object {
   "Parameters": Object {
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -425,7 +429,9 @@ def pick(dct, *keys):
         "IamInstanceProfile": Object {
           "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
         },
-        "ImageId": "",
+        "ImageId": Object {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "InstanceType": "t3.medium",
         "SecurityGroups": Array [
           Object {
@@ -1035,6 +1041,10 @@ aws ec2 create-tags --region ",
 exports[`ec2cluster can set UserData 1`] = `
 Object {
   "Parameters": Object {
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -1442,7 +1452,9 @@ def pick(dct, *keys):
         "IamInstanceProfile": Object {
           "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
         },
-        "ImageId": "",
+        "ImageId": Object {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "InstanceType": "t3.medium",
         "SecurityGroups": Array [
           Object {
@@ -2053,6 +2065,10 @@ aws ec2 create-tags --region ",
 exports[`ec2cluster can set tags 1`] = `
 Object {
   "Parameters": Object {
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -2460,7 +2476,9 @@ def pick(dct, *keys):
         "IamInstanceProfile": Object {
           "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
         },
-        "ImageId": "",
+        "ImageId": Object {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "InstanceType": "t3.medium",
         "SecurityGroups": Array [
           Object {
@@ -3094,6 +3112,10 @@ aws ec2 create-tags --region ",
 exports[`ec2cluster default 1`] = `
 Object {
   "Parameters": Object {
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -3501,7 +3523,9 @@ def pick(dct, *keys):
         "IamInstanceProfile": Object {
           "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
         },
-        "ImageId": "",
+        "ImageId": Object {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "InstanceType": "t3.medium",
         "SecurityGroups": Array [
           Object {
