@@ -13,59 +13,53 @@
 ## Synopsis
 
 ```typescript
-import * as cdk from '@aws-cdk/cdk'
-import * as ec2 from '@aws-cdk/aws-ec2'
-import * as ecs from '@aws-cdk/aws-ecs'
-import * as ecsPatterns from '@aws-cdk/aws-ecs-patterns'
+import { SynthUtils } from "@aws-cdk/assert"
+import { Vpc } from "@aws-cdk/aws-ec2"
+import { Role } from "@aws-cdk/aws-iam"
+import { Stack } from "@aws-cdk/core"
 
 import { Ec2Cluster, DeployFiles, ScalingPlan } from '@cohalz/cirrocumulus'
 
-export class SampleStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
-    super(scope, id, props)
+const stack = new Stack()
+const vpc = new Vpc(stack, "VPC")
 
-    const vpcProvider = new ec2.VpcNetworkProvider(this, { tags: { 'tag:Env': 'Prod' } })
-    const vpc = ec2.Vpc.fromVpcAttributes(this, 'ExternalVpc', vpcProvider.vpcProps)
+const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
+  instanceTypes: ["t3.medium"],
+  vpc,
+})
 
-    const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium"],
-      vpc,
-    })
+const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
+  "InstanceRole"
+) as Role
 
-    const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
-      "InstanceRole"
-    ) as Role
+const deployFiles = new DeployFiles(stack, "UpdateFiles", {
+  instanceRole,
+  source: "examples/",
+  targets: [
+    {
+      key: "tag:ClusterName",
+      values: [ec2Cluster.cluster.clusterName],
+    },
+  ],
+})
 
-    const deployFiles = new DeployFiles(stack, "UpdateFiles", {
-      instanceRole,
-      source: "examples/",
-      targets: [
-        {
-          key: "tag:ClusterName",
-          values: [ec2Cluster.cluster.clusterName],
-        },
-      ],
-    })
+const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
+  autoScalingGroupName: ec2Cluster.autoScalingGroup.autoScalingGroupName,
+  tagFilters: [
+    {
+      key: "ClusterName",
+      values: [ec2Cluster.cluster.clusterName],
+    },
+  ],
+})
 
-    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
-      autoScalingGroupName: ec2Cluster.autoScalingGroup.autoScalingGroupName,
-      tagFilters: [
-        {
-          key: "ClusterName",
-          values: [ec2Cluster.cluster.clusterName],
-        },
-      ],
-    })
+const ecsService = new ecsPatterns.LoadBalancedEc2Service(this, "Ec2Service", {
+  cluster: ec2Cluster.cluster,
+  memoryLimitMiB: 512,
+  image: ecs.ContainerImage.fromRegistry("amazon/amazon-ecs-sample"),
+})
 
-    const ecsService = new ecsPatterns.LoadBalancedEc2Service(this, "Ec2Service", {
-      cluster: ec2Cluster.cluster,
-      memoryLimitMiB: 512,
-      image: ecs.ContainerImage.fromRegistry("amazon/amazon-ecs-sample"),
-    })
-
-    new cdk.CfnOutput(this, 'LoadBalancerDNS', { value: ecsService.loadBalancer.loadBalancerDnsName })
-  }
-}
+new cdk.CfnOutput(this, 'LoadBalancerDNS', { value: ecsService.loadBalancer.loadBalancerDnsName })
 ```
 
 ## License

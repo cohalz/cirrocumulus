@@ -5,7 +5,6 @@ import {
   UpdateType,
 } from "@aws-cdk/aws-autoscaling"
 import {
-  AmazonLinuxImage,
   CfnLaunchTemplate,
   InstanceType,
   SecurityGroup,
@@ -14,6 +13,7 @@ import {
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
+import { ImportedImage } from "./lib/imported-image"
 
 export interface Ec2ClusterProps
   extends Pick<
@@ -55,9 +55,9 @@ export interface Ec2ClusterProps
 }
 
 export class Ec2Cluster extends Construct {
-  public readonly ami: EcsOptimizedAmi
   public readonly autoScalingGroup: AutoScalingGroup
   public readonly cluster: Cluster
+  private readonly amiId: string
   private readonly onDemandOnly: boolean
 
   constructor(scope: Construct, id: string, props: Ec2ClusterProps) {
@@ -77,7 +77,8 @@ export class Ec2Cluster extends Construct {
       this.onDemandOnly = false
     }
 
-    this.ami = new EcsOptimizedAmi()
+    const ami = new EcsOptimizedAmi()
+    this.amiId = ami.getImage(this).imageId
 
     this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
 
@@ -116,7 +117,7 @@ export class Ec2Cluster extends Construct {
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
       instanceType: new InstanceType(props.instanceTypes[0]),
-      machineImage: new AmazonLinuxImage(),
+      machineImage: new ImportedImage(this.amiId),
       updateType: UpdateType.REPLACING_UPDATE,
       ...props,
     })
@@ -167,7 +168,7 @@ export class Ec2Cluster extends Construct {
     return new CfnLaunchTemplate(scope, "AutoScalingGroupLaunchTemplate", {
       launchTemplateData: {
         iamInstanceProfile: { name: cfnInstanceProfile.ref },
-        imageId: this.ami.getImage(scope).imageId,
+        imageId: this.amiId,
         instanceType,
         securityGroupIds: [securityGroup.securityGroupId],
         tagSpecifications: [
