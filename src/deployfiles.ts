@@ -58,12 +58,12 @@ export class DeployFiles extends Construct {
     this.createEventToAutoDeploy(
       scope,
       this.bucket,
-      document.refAsString,
+      document.ref,
       props.targets
     )
 
     const association = new CfnAssociation(scope, "AssociationToDeploy", {
-      name: document.refAsString,
+      name: document.ref,
       scheduleExpression: "cron(0 10 ? * * *)",
       targets: props.targets,
     })
@@ -75,7 +75,7 @@ export class DeployFiles extends Construct {
     localDir: string
   ) {
     const bucket = new Bucket(scope, "BucketToDeploy", {
-      blockPublicAccess: BlockPublicAccess.BlockAll,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     })
 
     const s3Policy = new PolicyStatement()
@@ -96,7 +96,7 @@ export class DeployFiles extends Construct {
   private createDocumentToDeploy(scope: Construct, s3Path: string) {
     const commands = [
       "set -eux",
-      `aws --region ${Aws.region} s3 sync --delete --exact-timestamps s3://${s3Path} ${s3Path}`,
+      `aws --region ${Aws.REGION} s3 sync --delete --exact-timestamps s3://${s3Path} ${s3Path}`,
       `cd ${s3Path}`,
       "chmod -R +x bin/",
       "find bin/ -type f | xargs -n 1 bash",
@@ -132,11 +132,11 @@ export class DeployFiles extends Construct {
       enableFileValidation: false,
       includeGlobalServiceEvents: false,
       isMultiRegionTrail: false,
-      managementEvents: ReadWriteType.WriteOnly,
+      managementEvents: ReadWriteType.WRITE_ONLY,
     })
 
     trail.addS3EventSelector([`${bucket.bucketArn}/`], {
-      readWriteType: ReadWriteType.WriteOnly,
+      readWriteType: ReadWriteType.WRITE_ONLY,
     })
 
     const rule = new Rule(scope, "RuleToAutoDeploy", {
@@ -156,8 +156,8 @@ export class DeployFiles extends Construct {
     const eventPolicyStatement = new PolicyStatement()
     eventPolicyStatement.addActions("ssm:SendCommand")
     eventPolicyStatement.addResources(
-      `arn:aws:ssm:${Aws.region}:*:document/*`,
-      `arn:aws:ec2:${Aws.region}:*:instance/*`
+      `arn:aws:ssm:${Aws.REGION}:*:document/*`,
+      `arn:aws:ec2:${Aws.REGION}:*:instance/*`
     )
 
     const eventRole = new Role(scope, "EventRoleForAutoDeploy", {
@@ -168,7 +168,7 @@ export class DeployFiles extends Construct {
 
     const target: IRuleTarget = {
       bind: () => ({
-        arn: `arn:aws:ssm:${Aws.region}:${Aws.accountId}:document/${documentName}`,
+        arn: `arn:aws:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:document/${documentName}`,
         id: documentName,
         role: eventRole,
         runCommandParameters: {

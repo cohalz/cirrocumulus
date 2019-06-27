@@ -1,5 +1,5 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import { Vpc } from "@aws-cdk/aws-ec2"
+import { UserData, Vpc } from "@aws-cdk/aws-ec2"
 import { Stack } from "@aws-cdk/core"
 
 import { Ec2Cluster } from "./ec2cluster"
@@ -34,9 +34,12 @@ describe("ec2cluster", () => {
     const stack = new Stack()
     const vpc = new Vpc(stack, "VPC")
 
+    const userData = UserData.forLinux({ shebang: "" })
+    userData.addCommands("echo 1")
+
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       instanceTypes: ["t3.medium"],
-      userData: ["echo 1"],
+      userData,
       vpc,
     })
 

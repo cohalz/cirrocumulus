@@ -5,14 +5,15 @@ import {
   UpdateType,
 } from "@aws-cdk/aws-autoscaling"
 import {
-  AmazonLinuxGeneration,
   CfnLaunchTemplate,
   InstanceType,
   SecurityGroup,
+  UserData,
 } from "@aws-cdk/aws-ec2"
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
+import { DummyImage } from "./dummy-image"
 
 export interface Ec2ClusterProps
   extends Pick<
@@ -44,7 +45,7 @@ export interface Ec2ClusterProps
    * Userdata that you want to execute additionally
    *
    */
-  userData?: string[]
+  userData?: UserData
 
   /**
    * Tags to be applied to the Auto Scaling Group
@@ -76,9 +77,7 @@ export class Ec2Cluster extends Construct {
       this.onDemandOnly = false
     }
 
-    this.ami = new EcsOptimizedAmi({
-      generation: AmazonLinuxGeneration.AmazonLinux2,
-    })
+    this.ami = new EcsOptimizedAmi()
 
     this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
 
@@ -117,8 +116,8 @@ export class Ec2Cluster extends Construct {
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
       instanceType: new InstanceType(props.instanceTypes[0]),
-      machineImage: this.ami,
-      updateType: UpdateType.ReplacingUpdate,
+      machineImage: new DummyImage(),
+      updateType: UpdateType.REPLACING_UPDATE,
       ...props,
     })
   }
@@ -127,7 +126,7 @@ export class Ec2Cluster extends Construct {
     scope: Construct,
     instanceType: string,
     extraTags?: { [key: string]: string },
-    extraUserData?: string[]
+    extraUserData?: UserData
   ) {
     const cfnAsg = this.autoScalingGroup.node.findChild(
       "ASG"
@@ -167,7 +166,7 @@ export class Ec2Cluster extends Construct {
 
     return new CfnLaunchTemplate(scope, "AutoScalingGroupLaunchTemplate", {
       launchTemplateData: {
-        iamInstanceProfile: { name: cfnInstanceProfile.refAsString },
+        iamInstanceProfile: { name: cfnInstanceProfile.ref },
         imageId: this.ami.getImage(scope).imageId,
         instanceType,
         securityGroupIds: [securityGroup.securityGroupId],
@@ -189,7 +188,7 @@ export class Ec2Cluster extends Construct {
   private configureUserData(
     clusterName: string,
     logicalId: string,
-    userData?: string[]
+    userData?: UserData
   ) {
     // https://github.com/aws/amazon-ecs-agent/issues/1707#issuecomment-490498502
     const configureECSService = [
@@ -211,13 +210,13 @@ export class Ec2Cluster extends Construct {
       "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
       `host_name=${clusterName}--$(echo $instance_id)`,
       "hostnamectl set-hostname $host_name",
-      `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=Name,Value=$host_name`,
+      `aws ec2 create-tags --region ${Aws.REGION} --resources $instance_id --tags Key=Name,Value=$host_name`,
     ]
 
     const setArnTag = [
       "until metadata=$(curl -s --fail http://localhost:51678/v1/metadata); do sleep 1; done;",
       'container_instance_arn=$(echo "${metadata}" | jq -er ".ContainerInstanceArn")',
-      `aws ec2 create-tags --region ${Aws.region} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
+      `aws ec2 create-tags --region ${Aws.REGION} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
     ]
 
     return Fn.base64(
@@ -225,13 +224,13 @@ export class Ec2Cluster extends Construct {
         "#!/bin/sh",
         "yum update -y",
         "yum install -y aws-cfn-bootstrap aws-cli jq",
-        `yum install -y https://amazon-ssm-${Aws.region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
+        `yum install -y https://amazon-ssm-${Aws.REGION}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
         ...configureECSService,
         ...ecsConfig,
         ...setHostName,
         ...setArnTag,
-        ...(userData || []),
-        `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.stackName} --resource ${logicalId} --region ${Aws.region}`,
+        userData,
+        `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.STACK_NAME} --resource ${logicalId} --region ${Aws.REGION}`,
       ].join("\n")
     )
   }
@@ -241,14 +240,14 @@ export class Ec2Cluster extends Construct {
       "ASG"
     ) as CfnAutoScalingGroup
 
-    cfnAsg.options.creationPolicy = {
+    cfnAsg.cfnOptions.creationPolicy = {
       resourceSignal: {
         count: minCapacity ? minCapacity : 1,
         timeout: "PT7M",
       },
     }
 
-    cfnAsg.options.updatePolicy = {
+    cfnAsg.cfnOptions.updatePolicy = {
       autoScalingRollingUpdate: {
         maxBatchSize: 1,
         minInstancesInService: minCapacity ? minCapacity : 1,
@@ -279,7 +278,7 @@ export class Ec2Cluster extends Construct {
 
     if (this.onDemandOnly) {
       cfnAsg.addPropertyOverride("LaunchTemplate", {
-        LaunchTemplateId: launchTemplate.refAsString,
+        LaunchTemplateId: launchTemplate.ref,
         Version: launchTemplate.attrLatestVersionNumber,
       })
     } else {
@@ -289,7 +288,7 @@ export class Ec2Cluster extends Construct {
         },
         LaunchTemplate: {
           LaunchTemplateSpecification: {
-            LaunchTemplateId: launchTemplate.refAsString,
+            LaunchTemplateId: launchTemplate.ref,
             Version: launchTemplate.attrLatestVersionNumber,
           },
           Overrides: instanceTypes.map(instanceType => ({
