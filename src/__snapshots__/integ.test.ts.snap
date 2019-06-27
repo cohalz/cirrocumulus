@@ -27,6 +27,10 @@ Object {
       "Description": "S3 key for asset version \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
       "Type": "String",
     },
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": Object {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -496,7 +500,9 @@ def pick(dct, *keys):
         "IamInstanceProfile": Object {
           "Ref": "AutoScalingGroupInstanceProfile342FAC7C",
         },
-        "ImageId": "",
+        "ImageId": Object {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
         "InstanceType": "t3.medium",
         "SecurityGroups": Array [
           Object {
@@ -1327,7 +1333,7 @@ aws ec2 create-tags --region ",
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.229--",
+            "Id": "--Token-TOKEN.232--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
