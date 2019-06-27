@@ -11,7 +11,7 @@ import {
 import { BlockPublicAccess, Bucket } from "@aws-cdk/aws-s3"
 import { BucketDeployment, Source } from "@aws-cdk/aws-s3-deployment"
 import { CfnAssociation, CfnDocument } from "@aws-cdk/aws-ssm"
-import { Aws, Construct, Stack } from "@aws-cdk/cdk"
+import { Aws, Construct, Stack } from "@aws-cdk/core"
 
 import * as path from "path"
 

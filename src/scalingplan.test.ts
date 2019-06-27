@@ -1,5 +1,5 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import { Stack } from "@aws-cdk/cdk"
+import { Stack } from "@aws-cdk/core"
 import { ScalingPlan } from "./scalingplan"
 
 describe("scalingplan", () => {
