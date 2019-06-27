@@ -1,6 +1,6 @@
 {
   "name": "@cohalz/cirrocumulus",
-  "version": "0.1.5",
+  "version": "0.1.51",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "repository": {
