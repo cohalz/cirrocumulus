@@ -13,7 +13,7 @@ import {
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
-import { DummyImage } from "./dummy-image"
+import { DummyImage } from "./lib/dummy-image"
 
 export interface Ec2ClusterProps
   extends Pick<
