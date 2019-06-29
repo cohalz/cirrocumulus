@@ -1235,52 +1235,6 @@ aws ec2 create-tags --region ",
       },
       "Type": "AWS::IAM::Policy",
     },
-    "Resource": Object {
-      "Properties": Object {
-        "ApplicationSource": Object {
-          "TagFilters": Array [
-            Object {
-              "Key": "ClusterName",
-              "Values": Array [
-                Object {
-                  "Ref": "Ec2Cluster796ACAF5",
-                },
-              ],
-            },
-          ],
-        },
-        "ScalingInstructions": Array [
-          Object {
-            "MaxCapacity": 1,
-            "MinCapacity": 1,
-            "ResourceId": Object {
-              "Fn::Join": Array [
-                "",
-                Array [
-                  "autoScalingGroup/",
-                  Object {
-                    "Ref": "AutoScalingGroupASG804C35BE",
-                  },
-                ],
-              ],
-            },
-            "ScalableDimension": "autoscaling:autoScalingGroup:DesiredCapacity",
-            "ScalingPolicyUpdateBehavior": "ReplaceExternalPolicies",
-            "ServiceNamespace": "autoscaling",
-            "TargetTrackingConfigurations": Array [
-              Object {
-                "EstimatedInstanceWarmup": 300,
-                "PredefinedScalingMetricSpecification": Object {
-                  "PredefinedScalingMetricType": "ASGAverageCPUUtilization",
-                },
-                "TargetValue": 50,
-              },
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::AutoScalingPlans::ScalingPlan",
-    },
     "RuleToAutoDeploy2C2BF89A": Object {
       "Properties": Object {
         "EventPattern": Object {

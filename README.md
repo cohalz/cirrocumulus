@@ -43,16 +43,6 @@ const deployFiles = new DeployFiles(stack, "UpdateFiles", {
   ],
 })
 
-const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
-  autoScalingGroupName: ec2Cluster.autoScalingGroup.autoScalingGroupName,
-  tagFilters: [
-    {
-      key: "ClusterName",
-      values: [ec2Cluster.cluster.clusterName],
-    },
-  ],
-})
-
 const ecsService = new ecsPatterns.LoadBalancedEc2Service(this, "Ec2Service", {
   cluster: ec2Cluster.cluster,
   memoryLimitMiB: 512,
