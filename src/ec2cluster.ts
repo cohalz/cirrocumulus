@@ -189,8 +189,15 @@ export class Ec2Cluster extends Construct {
   private configureUserData(
     clusterName: string,
     logicalId: string,
-    userData?: UserData
+    extraUserData?: UserData
   ) {
+    const init = [
+      "#!/bin/sh",
+      "yum update -y",
+      "yum install -y aws-cfn-bootstrap aws-cli jq",
+      `yum install -y https://amazon-ssm-${Aws.REGION}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
+    ]
+
     // https://github.com/aws/amazon-ecs-agent/issues/1707#issuecomment-490498502
     const configureECSService = [
       'sed -i "/After=cloud-final.service/d" /usr/lib/systemd/system/ecs.service',
@@ -220,20 +227,23 @@ export class Ec2Cluster extends Construct {
       `aws ec2 create-tags --region ${Aws.REGION} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
     ]
 
-    return Fn.base64(
-      [
-        "#!/bin/sh",
-        "yum update -y",
-        "yum install -y aws-cfn-bootstrap aws-cli jq",
-        `yum install -y https://amazon-ssm-${Aws.REGION}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
-        ...configureECSService,
-        ...ecsConfig,
-        ...setHostName,
-        ...setArnTag,
-        userData,
-        `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.STACK_NAME} --resource ${logicalId} --region ${Aws.REGION}`,
-      ].join("\n")
+    const userData = [
+      ...init,
+      ...configureECSService,
+      ...ecsConfig,
+      ...setHostName,
+      ...setArnTag,
+    ]
+
+    if (extraUserData) {
+      userData.push(extraUserData.render())
+    }
+
+    userData.push(
+      `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.STACK_NAME} --resource ${logicalId} --region ${Aws.REGION}`
     )
+
+    return Fn.base64(userData.join("\n"))
   }
 
   private addCfnPolicy = (minCapacity?: number) => {

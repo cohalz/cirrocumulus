@@ -547,7 +547,6 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -1463,6 +1462,7 @@ def pick(dct, *keys):
               Array [
                 "
 echo 1
+echo 2
 echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
@@ -1567,7 +1567,9 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-[object Object]
+
+echo 1
+echo 2
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -2610,7 +2612,6 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -3629,7 +3630,6 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
