@@ -80,11 +80,6 @@ export class Ec2Cluster extends Construct {
     const ami = new EcsOptimizedAmi()
     this.amiId = ami.getImage(this).imageId
 
-    if (props.userData) {
-      // tslint:disable-next-line:no-console
-      console.log(props.userData.render())
-    }
-
     this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
 
     const launchTemplate = this.createLaunchTemplate(
