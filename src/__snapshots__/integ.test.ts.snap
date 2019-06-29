@@ -618,7 +618,6 @@ aws ec2 create-tags --region ",
                     "Ref": "AWS::Region",
                   },
                   " --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn
-
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
