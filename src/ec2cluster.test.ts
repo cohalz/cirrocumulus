@@ -35,7 +35,7 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const userData = UserData.forLinux({ shebang: "" })
-    userData.addCommands("echo 1")
+    userData.addCommands("echo 1", "echo 2")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
       instanceTypes: ["t3.medium"],
