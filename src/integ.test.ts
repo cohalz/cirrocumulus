@@ -5,7 +5,6 @@ import { Stack } from "@aws-cdk/core"
 
 import { DeployFiles } from "./deployfiles"
 import { Ec2Cluster } from "./ec2cluster"
-import { ScalingPlan } from "./scalingplan"
 
 describe("ec2cluster", () => {
   test("default", () => {
@@ -32,15 +31,6 @@ describe("ec2cluster", () => {
       ],
     })
 
-    const scalingPlan = new ScalingPlan(stack, "ScalingPlan", {
-      autoScalingGroupName: ec2Cluster.autoScalingGroup.autoScalingGroupName,
-      tagFilters: [
-        {
-          key: "ClusterName",
-          values: [ec2Cluster.cluster.clusterName],
-        },
-      ],
-    })
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
   })
 })
