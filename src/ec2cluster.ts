@@ -17,7 +17,7 @@ import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
 import { ImportedImage } from "./lib/imported-image"
 
-interface InstancePair {
+export interface InstancePair {
   class: InstanceClass
   size: InstanceSize
 }
