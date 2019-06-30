@@ -41,7 +41,6 @@
     "typescript": "3.5.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-autoscalingplans": "0.36.0",
     "@aws-cdk/aws-cloudtrail": "0.36.0",
     "@aws-cdk/aws-ecs": "0.36.0",
     "@aws-cdk/aws-s3-deployment": "0.36.0",

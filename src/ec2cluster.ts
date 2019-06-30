@@ -6,6 +6,8 @@ import {
 } from "@aws-cdk/aws-autoscaling"
 import {
   CfnLaunchTemplate,
+  InstanceClass,
+  InstanceSize,
   InstanceType,
   SecurityGroup,
   UserData,
@@ -14,6 +16,11 @@ import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
 import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
 import { ImportedImage } from "./lib/imported-image"
+
+export interface InstancePair {
+  readonly class: InstanceClass
+  readonly size: InstanceSize
+}
 
 export interface Ec2ClusterProps
   extends Pick<
@@ -25,33 +32,35 @@ export interface Ec2ClusterProps
    *
    * When using spot instances, must set multiple instance types
    */
-  instanceTypes: string[]
+  readonly instancePairs: InstancePair[]
 
   /**
    * A name for the cluster
    *
    * @default CloudFormation-generated name
    */
-  name?: string
+  readonly name?: string
 
   /**
    * The percentage of On-Demand Instances for your capacity when using Spot Instances
    *
    * @default 100 (All instances are On Demand)
    */
-  onDemandPercentage?: number
+  readonly onDemandPercentage?: number
 
   /**
    * Userdata that you want to execute additionally
    *
+   * @default No additional userdata
    */
-  userData?: UserData
+  readonly userData?: UserData
 
   /**
    * Tags to be applied to the Auto Scaling Group
    *
+   * @default No additional tags
    */
-  tags?: { [key: string]: string }
+  readonly tags?: { [key: string]: string }
 }
 
 export class Ec2Cluster extends Construct {
@@ -81,42 +90,48 @@ export class Ec2Cluster extends Construct {
     this.amiId = ami.getImage(this).imageId
 
     this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
+    this.cluster.addAutoScalingGroup(this.autoScalingGroup, {
+      canContainersAccessInstanceRole: true,
+    })
+
+    const userData = this.configureUserData(props.userData)
 
     const launchTemplate = this.createLaunchTemplate(
       scope,
-      props.instanceTypes[0],
-      props.tags,
-      props.userData
+      props.instancePairs[0],
+      userData,
+      props.tags
     )
 
     this.useLaunchTemplate(
       launchTemplate,
-      props.instanceTypes,
+      props.instancePairs,
       props.onDemandPercentage
     )
 
     this.addCfnPolicy(props.minCapacity)
-
-    this.cluster.addAutoScalingGroup(this.autoScalingGroup)
   }
 
   private createAutoScalingGroup = (
     scope: Construct,
     props: Ec2ClusterProps
   ) => {
-    if (this.onDemandOnly && props.instanceTypes.length > 1) {
+    if (this.onDemandOnly && props.instancePairs.length > 1) {
       throw new Error(
         "When using on-demand instances, please set single instance type."
       )
     }
-    if (!this.onDemandOnly && props.instanceTypes.length <= 1) {
+    if (!this.onDemandOnly && props.instancePairs.length <= 1) {
       throw new Error(
         "When using spot instances, please set multiple instance types."
       )
     }
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
-      instanceType: new InstanceType(props.instanceTypes[0]),
+      instanceType: InstanceType.of(
+        props.instancePairs[0].class,
+        props.instancePairs[0].size
+      ),
       machineImage: new ImportedImage(this.amiId),
       updateType: UpdateType.REPLACING_UPDATE,
       ...props,
@@ -125,9 +140,9 @@ export class Ec2Cluster extends Construct {
 
   private createLaunchTemplate(
     scope: Construct,
-    instanceType: string,
-    extraTags?: { [key: string]: string },
-    extraUserData?: UserData
+    instancePair: InstancePair,
+    userData: UserData,
+    extraTags?: { [key: string]: string }
   ) {
     const cfnAsg = this.autoScalingGroup.node.findChild(
       "ASG"
@@ -159,17 +174,14 @@ export class Ec2Cluster extends Construct {
       }
     }
 
-    const userData = this.configureUserData(
-      this.cluster.clusterName,
-      cfnAsg.logicalId,
-      extraUserData
-    )
-
     return new CfnLaunchTemplate(scope, "AutoScalingGroupLaunchTemplate", {
       launchTemplateData: {
         iamInstanceProfile: { name: cfnInstanceProfile.ref },
         imageId: this.amiId,
-        instanceType,
+        instanceType: InstanceType.of(
+          instancePair.class,
+          instancePair.size
+        ).toString(),
         securityGroupIds: [securityGroup.securityGroupId],
         tagSpecifications: [
           {
@@ -181,18 +193,19 @@ export class Ec2Cluster extends Construct {
             tags,
           },
         ],
-        userData,
+        userData: Fn.base64(userData.render()),
       },
     })
   }
 
-  private configureUserData(
-    clusterName: string,
-    logicalId: string,
-    extraUserData?: UserData
-  ) {
+  private configureUserData(extraUserData?: UserData) {
+    const cfnAsg = this.autoScalingGroup.node.findChild(
+      "ASG"
+    ) as CfnAutoScalingGroup
+
+    const userData = UserData.forLinux()
+
     const init = [
-      "#!/bin/sh",
       "yum update -y",
       "yum install -y aws-cfn-bootstrap aws-cli jq",
       `yum install -y https://amazon-ssm-${Aws.REGION}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm`,
@@ -206,7 +219,7 @@ export class Ec2Cluster extends Construct {
     ]
 
     const ecsConfig = [
-      `echo ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config`,
+      `echo ECS_CLUSTER=${this.cluster.clusterName} >> /etc/ecs/ecs.config`,
       "cat << EOF >> /etc/ecs/ecs.config",
       'ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","awslogs","fluentd","syslog","journald","gelf","logentries","splunk"]',
       "ECS_ENABLE_CONTAINER_METADATA=true",
@@ -216,7 +229,7 @@ export class Ec2Cluster extends Construct {
 
     const setHostName = [
       "instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
-      `host_name=${clusterName}--$(echo $instance_id)`,
+      `host_name=${this.cluster.clusterName}--$(echo $instance_id)`,
       "hostnamectl set-hostname $host_name",
       `aws ec2 create-tags --region ${Aws.REGION} --resources $instance_id --tags Key=Name,Value=$host_name`,
     ]
@@ -227,23 +240,23 @@ export class Ec2Cluster extends Construct {
       `aws ec2 create-tags --region ${Aws.REGION} --resources $instance_id --tags Key=ContainerInstanceArn,Value=$container_instance_arn`,
     ]
 
-    const userData = [
+    userData.addCommands(
       ...init,
       ...configureECSService,
       ...ecsConfig,
       ...setHostName,
-      ...setArnTag,
-    ]
-
-    if (extraUserData) {
-      userData.push(extraUserData.render())
-    }
-
-    userData.push(
-      `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.STACK_NAME} --resource ${logicalId} --region ${Aws.REGION}`
+      ...setArnTag
     )
 
-    return Fn.base64(userData.join("\n"))
+    if (extraUserData) {
+      userData.addCommands(extraUserData.render())
+    }
+
+    userData.addCommands(
+      `/opt/aws/bin/cfn-signal -e $? --stack ${Aws.STACK_NAME} --resource ${cfnAsg.logicalId} --region ${Aws.REGION}`
+    )
+
+    return userData
   }
 
   private addCfnPolicy = (minCapacity?: number) => {
@@ -277,7 +290,7 @@ export class Ec2Cluster extends Construct {
   // use LaunchTemplate instead of LaunchConfiguration
   private useLaunchTemplate = (
     launchTemplate: CfnLaunchTemplate,
-    instanceTypes: string[],
+    instancePairs: InstancePair[],
     onDemandPercentage?: number
   ) => {
     const cfnAsg = this.autoScalingGroup.node.findChild(
@@ -302,8 +315,11 @@ export class Ec2Cluster extends Construct {
             LaunchTemplateId: launchTemplate.ref,
             Version: launchTemplate.attrLatestVersionNumber,
           },
-          Overrides: instanceTypes.map(instanceType => ({
-            InstanceType: instanceType,
+          Overrides: instancePairs.map(instancePair => ({
+            InstanceType: InstanceType.of(
+              instancePair.class,
+              instancePair.size
+            ).toString(),
           })),
         },
       })

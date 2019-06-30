@@ -1,9 +1,7 @@
 import { ReadWriteType, Trail } from "@aws-cdk/aws-cloudtrail"
-import { IRuleTarget, Rule } from "@aws-cdk/aws-events"
+import { IRuleTarget, Rule, Schedule } from "@aws-cdk/aws-events"
 import {
-  CfnManagedPolicy,
   ManagedPolicy,
-  PolicyDocument,
   PolicyStatement,
   Role,
   ServicePrincipal,
@@ -11,7 +9,7 @@ import {
 import { BlockPublicAccess, Bucket } from "@aws-cdk/aws-s3"
 import { BucketDeployment, Source } from "@aws-cdk/aws-s3-deployment"
 import { CfnAssociation, CfnDocument } from "@aws-cdk/aws-ssm"
-import { Aws, Construct, Stack } from "@aws-cdk/core"
+import { Aws, Construct } from "@aws-cdk/core"
 
 import * as path from "path"
 
@@ -20,19 +18,26 @@ export interface DeployFilesProps {
    * The Local directory to deploy to instance
    *
    */
-  source: string
+  readonly source: string
 
   /**
    * The instance role
    *
    */
-  instanceRole: Role
+  readonly instanceRole: Role
 
   /**
    * The targets that the SSM document sends commands to
    *
    */
-  targets: CfnAssociation.TargetProperty[]
+  readonly targets: CfnAssociation.TargetProperty[]
+
+  /**
+   * Schedule for executing command
+   *
+   * @default Do not schedule
+   */
+  readonly schedule?: Schedule
 }
 
 export class DeployFiles extends Construct {
@@ -62,9 +67,13 @@ export class DeployFiles extends Construct {
       props.targets
     )
 
+    const scheduleExpression = props.schedule
+      ? props.schedule.expressionString
+      : undefined
+
     const association = new CfnAssociation(scope, "AssociationToDeploy", {
       name: document.ref,
-      scheduleExpression: "cron(0 10 ? * * *)",
+      scheduleExpression,
       targets: props.targets,
     })
   }
@@ -95,6 +104,7 @@ export class DeployFiles extends Construct {
 
   private createDocumentToDeploy(scope: Construct, s3Path: string) {
     const commands = [
+      "#!/bin/bash",
       "set -eux",
       `aws --region ${Aws.REGION} s3 sync --delete --exact-timestamps s3://${s3Path} ${s3Path}`,
       `cd ${s3Path}`,

@@ -359,14 +359,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "ec2:CreateTags",
-                "ec2:DescribeInstances",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "ecs:CreateCluster",
                 "ecs:DeregisterContainerInstance",
                 "ecs:DiscoverPollEndpoint",
@@ -377,6 +369,14 @@ def pick(dct, *keys):
                 "ecr:GetAuthorizationToken",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -447,10 +447,7 @@ echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
                 },
-                " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                " >> /etc/ecs/ecs.config",
               ],
             ],
           },
@@ -507,7 +504,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -1377,14 +1374,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "ec2:CreateTags",
-                "ec2:DescribeInstances",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "ecs:CreateCluster",
                 "ecs:DeregisterContainerInstance",
                 "ecs:DiscoverPollEndpoint",
@@ -1395,6 +1384,14 @@ def pick(dct, *keys):
                 "ecr:GetAuthorizationToken",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -1467,10 +1464,7 @@ echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
                 },
-                " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                " >> /etc/ecs/ecs.config",
               ],
             ],
           },
@@ -1527,7 +1521,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -1570,6 +1564,11 @@ aws ec2 create-tags --region ",
 
 echo 1
 echo 2
+echo ECS_CLUSTER=",
+                  Object {
+                    "Ref": "Ec2Cluster796ACAF5",
+                  },
+                  " >> /etc/ecs/ecs.config
 /opt/aws/bin/cfn-signal -e $? --stack ",
                   Object {
                     "Ref": "AWS::StackName",
@@ -2400,14 +2399,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "ec2:CreateTags",
-                "ec2:DescribeInstances",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "ecs:CreateCluster",
                 "ecs:DeregisterContainerInstance",
                 "ecs:DiscoverPollEndpoint",
@@ -2418,6 +2409,14 @@ def pick(dct, *keys):
                 "ecr:GetAuthorizationToken",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -2488,10 +2487,7 @@ echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
                 },
-                " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                " >> /etc/ecs/ecs.config",
               ],
             ],
           },
@@ -2572,7 +2568,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -3442,14 +3438,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "ec2:CreateTags",
-                "ec2:DescribeInstances",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "ecs:CreateCluster",
                 "ecs:DeregisterContainerInstance",
                 "ecs:DiscoverPollEndpoint",
@@ -3460,6 +3448,14 @@ def pick(dct, *keys):
                 "ecr:GetAuthorizationToken",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -3530,10 +3526,7 @@ echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
                 },
-                " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                " >> /etc/ecs/ecs.config",
               ],
             ],
           },
@@ -3590,7 +3583,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
