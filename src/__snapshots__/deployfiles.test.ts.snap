@@ -431,6 +431,7 @@ Object {
               "action": "aws:runShellScript",
               "inputs": Object {
                 "runCommand": Array [
+                  "#!/bin/bash",
                   "set -eux",
                   Object {
                     "Fn::Join": Array [

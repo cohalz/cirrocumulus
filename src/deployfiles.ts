@@ -93,6 +93,7 @@ export class DeployFiles extends Construct {
 
   private createDocumentToDeploy(scope: Construct, s3Path: string) {
     const commands = [
+      "#!/bin/bash",
       "set -eux",
       `aws --region ${Aws.REGION} s3 sync --delete --exact-timestamps s3://${s3Path} ${s3Path}`,
       `cd ${s3Path}`,
