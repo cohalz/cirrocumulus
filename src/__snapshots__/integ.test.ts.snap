@@ -401,14 +401,6 @@ def pick(dct, *keys):
           "Statement": Array [
             Object {
               "Action": Array [
-                "ec2:CreateTags",
-                "ec2:DescribeInstances",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "ecs:CreateCluster",
                 "ecs:DeregisterContainerInstance",
                 "ecs:DiscoverPollEndpoint",
@@ -419,6 +411,14 @@ def pick(dct, *keys):
                 "ecr:GetAuthorizationToken",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ec2:CreateTags",
+                "ec2:DescribeInstances",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -518,10 +518,7 @@ echo ECS_CLUSTER=",
                 Object {
                   "Ref": "Ec2Cluster796ACAF5",
                 },
-                " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                " >> /etc/ecs/ecs.config",
               ],
             ],
           },

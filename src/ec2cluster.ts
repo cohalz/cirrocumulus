@@ -24,8 +24,8 @@ export interface InstancePair {
 
 export interface Ec2ClusterProps
   extends Pick<
-    AutoScalingGroupProps,
-    Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
+  AutoScalingGroupProps,
+  Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
   > {
   /**
    * The instance types
@@ -88,6 +88,9 @@ export class Ec2Cluster extends Construct {
     this.amiId = ami.getImage(this).imageId
 
     this.autoScalingGroup = this.createAutoScalingGroup(scope, props)
+    this.cluster.addAutoScalingGroup(this.autoScalingGroup, {
+      canContainersAccessInstanceRole: true,
+    })
 
     const launchTemplate = this.createLaunchTemplate(
       scope,
@@ -103,8 +106,6 @@ export class Ec2Cluster extends Construct {
     )
 
     this.addCfnPolicy(props.minCapacity)
-
-    this.cluster.addAutoScalingGroup(this.autoScalingGroup)
   }
 
   private createAutoScalingGroup = (
