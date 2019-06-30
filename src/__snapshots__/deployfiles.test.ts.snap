@@ -1,5 +1,717 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`deployfiles can set scheduleExpression 1`] = `
+Object {
+  "Parameters": Object {
+    "BucketDeploymentAssetArtifactHash57B6FAC2": Object {
+      "Description": "Artifact hash for asset \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "BucketDeploymentAssetS3Bucket5FB20E3B": Object {
+      "Description": "S3 bucket for asset \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "BucketDeploymentAssetS3VersionKey0CD87795": Object {
+      "Description": "S3 key for asset version \\"BucketDeployment/Asset\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeArtifactHashEF37AD24": Object {
+      "Description": "Artifact hash for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7": Object {
+      "Description": "S3 bucket for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0": Object {
+      "Description": "S3 key for asset version \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+      "Type": "String",
+    },
+  },
+  "Resources": Object {
+    "AssociationToDeploy": Object {
+      "Properties": Object {
+        "Name": Object {
+          "Ref": "DeployCommands",
+        },
+        "ScheduleExpression": "cron(0 10 * * ? *)",
+        "Targets": Array [
+          Object {
+            "Key": "aws:cloudformation:stack-name",
+            "Values": Array [
+              "Stack",
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SSM::Association",
+    },
+    "BucketDeploymentCustomResourceCB7E2133": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "DestinationBucketKeyPrefix": "examples/",
+        "DestinationBucketName": Object {
+          "Ref": "BucketToDeploy91F87F54",
+        },
+        "ServiceToken": Object {
+          "Fn::GetAtt": Array [
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+            "Arn",
+          ],
+        },
+        "SourceBucketName": Object {
+          "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+        },
+        "SourceObjectKey": Object {
+          "Fn::Join": Array [
+            "",
+            Array [
+              Object {
+                "Fn::Select": Array [
+                  0,
+                  Object {
+                    "Fn::Split": Array [
+                      "||",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
+                      },
+                    ],
+                  },
+                ],
+              },
+              Object {
+                "Fn::Select": Array [
+                  1,
+                  Object {
+                    "Fn::Split": Array [
+                      "||",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "Custom::CDKBucketDeployment",
+    },
+    "BucketToDeploy91F87F54": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "PublicAccessBlockConfiguration": Object {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+    },
+    "CloudTrailToDeploy3F1E66BD": Object {
+      "DependsOn": Array [
+        "CloudTrailToDeployS3Policy3F1D1743",
+      ],
+      "Properties": Object {
+        "EnableLogFileValidation": false,
+        "EventSelectors": Array [
+          Object {
+            "IncludeManagementEvents": true,
+            "ReadWriteType": "WriteOnly",
+          },
+          Object {
+            "DataResources": Array [
+              Object {
+                "Type": "AWS::S3::Object",
+                "Values": Array [
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        Object {
+                          "Fn::GetAtt": Array [
+                            "BucketToDeploy91F87F54",
+                            "Arn",
+                          ],
+                        },
+                        "/",
+                      ],
+                    ],
+                  },
+                ],
+              },
+            ],
+            "ReadWriteType": "WriteOnly",
+          },
+        ],
+        "IncludeGlobalServiceEvents": false,
+        "IsLogging": true,
+        "IsMultiRegionTrail": false,
+        "S3BucketName": Object {
+          "Ref": "CloudTrailToDeployS385FF9393",
+        },
+      },
+      "Type": "AWS::CloudTrail::Trail",
+    },
+    "CloudTrailToDeployS385FF9393": Object {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::S3::Bucket",
+    },
+    "CloudTrailToDeployS3Policy3F1D1743": Object {
+      "Properties": Object {
+        "Bucket": Object {
+          "Ref": "CloudTrailToDeployS385FF9393",
+        },
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "s3:GetBucketAcl",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "cloudtrail.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "CloudTrailToDeployS385FF9393",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": "s3:PutObject",
+              "Condition": Object {
+                "StringEquals": Object {
+                  "s3:x-amz-acl": "bucket-owner-full-control",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "cloudtrail.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::GetAtt": Array [
+                        "CloudTrailToDeployS385FF9393",
+                        "Arn",
+                      ],
+                    },
+                    "/AWSLogs/",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": Object {
+      "DependsOn": Array [
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      ],
+      "Properties": Object {
+        "Code": Object {
+          "S3Bucket": Object {
+            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7",
+          },
+          "S3Key": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                Object {
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                Object {
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "Handler": "index.handler",
+        "Role": Object {
+          "Fn::GetAtt": Array [
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.6",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "lambda.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                      },
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "BucketToDeploy91F87F54",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "BucketToDeploy91F87F54",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "Roles": Array [
+          Object {
+            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DeployCommands": Object {
+      "Properties": Object {
+        "Content": Object {
+          "description": "document",
+          "mainSteps": Array [
+            Object {
+              "action": "aws:runShellScript",
+              "inputs": Object {
+                "runCommand": Array [
+                  "#!/bin/bash",
+                  "set -eux",
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        "aws --region ",
+                        Object {
+                          "Ref": "AWS::Region",
+                        },
+                        " s3 sync --delete --exact-timestamps s3://",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/ ",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/",
+                      ],
+                    ],
+                  },
+                  Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        "cd ",
+                        Object {
+                          "Ref": "BucketToDeploy91F87F54",
+                        },
+                        "/examples/",
+                      ],
+                    ],
+                  },
+                  "chmod -R +x bin/",
+                  "find bin/ -type f | xargs -n 1 bash",
+                ],
+                "timeoutSeconds": "60",
+                "workingDirectory": "/home/ec2-user",
+              },
+              "name": "runShellScript",
+            },
+          ],
+          "schemaVersion": "2.2",
+        },
+        "DocumentType": "Command",
+      },
+      "Type": "AWS::SSM::Document",
+    },
+    "EventRoleForAutoDeploy7E0815A5": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "events.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventRoleForAutoDeployDefaultPolicyF7A3A198": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:ssm:",
+                      Object {
+                        "Ref": "AWS::Region",
+                      },
+                      ":*:document/*",
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:ec2:",
+                      Object {
+                        "Ref": "AWS::Region",
+                      },
+                      ":*:instance/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventRoleForAutoDeployDefaultPolicyF7A3A198",
+        "Roles": Array [
+          Object {
+            "Ref": "EventRoleForAutoDeploy7E0815A5",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Role1ABCC5F0": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "ec2.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RoleDefaultPolicy5FFB7DAB": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "s3:Get*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "BucketToDeploy91F87F54",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "BucketToDeploy91F87F54",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RoleDefaultPolicy5FFB7DAB",
+        "Roles": Array [
+          Object {
+            "Ref": "Role1ABCC5F0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RuleToAutoDeploy2C2BF89A": Object {
+      "Properties": Object {
+        "EventPattern": Object {
+          "detail": Object {
+            "eventName": Array [
+              "PutObject",
+            ],
+            "eventSource": Array [
+              "s3.amazonaws.com",
+            ],
+            "requestParameters": Object {
+              "bucketName": Array [
+                Object {
+                  "Ref": "BucketToDeploy91F87F54",
+                },
+              ],
+            },
+          },
+          "detail-type": Array [
+            "AWS API Call via CloudTrail",
+          ],
+          "source": Array [
+            "aws.s3",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": Array [
+          Object {
+            "Arn": Object {
+              "Fn::Join": Array [
+                "",
+                Array [
+                  "arn:aws:ssm:",
+                  Object {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  Object {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":document/",
+                  Object {
+                    "Ref": "DeployCommands",
+                  },
+                ],
+              ],
+            },
+            "Id": "--Token-TOKEN.197--",
+            "RoleArn": Object {
+              "Fn::GetAtt": Array [
+                "EventRoleForAutoDeploy7E0815A5",
+                "Arn",
+              ],
+            },
+            "RunCommandParameters": Object {
+              "RunCommandTargets": Array [
+                Object {
+                  "Key": "aws:cloudformation:stack-name",
+                  "Values": Array [
+                    "Stack",
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+  },
+}
+`;
+
 exports[`deployfiles default 1`] = `
 Object {
   "Parameters": Object {
@@ -34,7 +746,6 @@ Object {
         "Name": Object {
           "Ref": "DeployCommands",
         },
-        "ScheduleExpression": "cron(0 10 ? * * *)",
         "Targets": Array [
           Object {
             "Key": "aws:cloudformation:stack-name",
