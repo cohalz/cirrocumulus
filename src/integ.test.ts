@@ -1,5 +1,5 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import { Vpc } from "@aws-cdk/aws-ec2"
+import { InstanceClass, InstanceSize, Vpc } from "@aws-cdk/aws-ec2"
 import { Role } from "@aws-cdk/aws-iam"
 import { Stack } from "@aws-cdk/core"
 
@@ -12,7 +12,12 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instanceTypes: ["t3.medium"],
+      instancePairs: [
+        {
+          class: InstanceClass.T3,
+          size: InstanceSize.MEDIUM,
+        },
+      ],
       vpc,
     })
 
