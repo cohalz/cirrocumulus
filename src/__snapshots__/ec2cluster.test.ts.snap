@@ -504,7 +504,7 @@ echo ECS_CLUSTER=",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -1521,7 +1521,7 @@ echo ECS_CLUSTER=",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -2568,7 +2568,7 @@ echo ECS_CLUSTER=",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
@@ -3583,7 +3583,7 @@ echo ECS_CLUSTER=",
               "Fn::Join": Array [
                 "",
                 Array [
-                  "#!/bin/sh
+                  "#!/bin/bash
 yum update -y
 yum install -y aws-cfn-bootstrap aws-cli jq
 yum install -y https://amazon-ssm-",
