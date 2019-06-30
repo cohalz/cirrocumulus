@@ -1,9 +1,7 @@
 import { ReadWriteType, Trail } from "@aws-cdk/aws-cloudtrail"
 import { IRuleTarget, Rule } from "@aws-cdk/aws-events"
 import {
-  CfnManagedPolicy,
   ManagedPolicy,
-  PolicyDocument,
   PolicyStatement,
   Role,
   ServicePrincipal,
@@ -20,19 +18,19 @@ export interface DeployFilesProps {
    * The Local directory to deploy to instance
    *
    */
-  source: string
+  readonly source: string
 
   /**
    * The instance role
    *
    */
-  instanceRole: Role
+  readonly instanceRole: Role
 
   /**
    * The targets that the SSM document sends commands to
    *
    */
-  targets: CfnAssociation.TargetProperty[]
+  readonly targets: CfnAssociation.TargetProperty[]
 }
 
 export class DeployFiles extends Construct {

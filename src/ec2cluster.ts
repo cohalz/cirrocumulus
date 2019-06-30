@@ -18,8 +18,8 @@ import { Aws, Construct, Fn } from "@aws-cdk/core"
 import { ImportedImage } from "./lib/imported-image"
 
 export interface InstancePair {
-  class: InstanceClass
-  size: InstanceSize
+  readonly class: InstanceClass
+  readonly size: InstanceSize
 }
 
 export interface Ec2ClusterProps
@@ -32,33 +32,33 @@ export interface Ec2ClusterProps
    *
    * When using spot instances, must set multiple instance types
    */
-  instancePairs: InstancePair[]
+  readonly instancePairs: InstancePair[]
 
   /**
    * A name for the cluster
    *
    * @default CloudFormation-generated name
    */
-  name?: string
+  readonly name?: string
 
   /**
    * The percentage of On-Demand Instances for your capacity when using Spot Instances
    *
    * @default 100 (All instances are On Demand)
    */
-  onDemandPercentage?: number
+  readonly onDemandPercentage?: number
 
   /**
    * Userdata that you want to execute additionally
    *
    */
-  userData?: UserData
+  readonly userData?: UserData
 
   /**
    * Tags to be applied to the Auto Scaling Group
    *
    */
-  tags?: { [key: string]: string }
+  readonly tags?: { [key: string]: string }
 }
 
 export class Ec2Cluster extends Construct {
