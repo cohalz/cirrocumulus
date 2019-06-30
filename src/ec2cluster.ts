@@ -51,12 +51,14 @@ export interface Ec2ClusterProps
   /**
    * Userdata that you want to execute additionally
    *
+   * @default No additional userdata
    */
   readonly userData?: UserData
 
   /**
    * Tags to be applied to the Auto Scaling Group
    *
+   * @default No additional tags
    */
   readonly tags?: { [key: string]: string }
 }
