@@ -56,9 +56,7 @@ export class DeployFiles extends Construct {
       ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
     )
 
-    const s3Path = `${this.bucket.bucketName}/${props.source}`
-
-    const document = this.createDocumentToDeploy(scope, s3Path)
+    const document = this.createDocumentToDeploy(scope, props.source)
 
     this.createEventToAutoDeploy(
       scope,
@@ -81,8 +79,10 @@ export class DeployFiles extends Construct {
   private createBucketToDeploy(
     scope: Construct,
     instanceRole: Role,
-    localDir: string
+    source: string
   ) {
+    const dirName = `${path.basename(source)}/`
+
     const bucket = new Bucket(scope, "BucketToDeploy", {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     })
@@ -92,17 +92,19 @@ export class DeployFiles extends Construct {
     s3Policy.addResources(bucket.bucketArn, bucket.arnForObjects("*"))
     instanceRole.addToPolicy(s3Policy)
 
-    const absolutePath = path.join(process.cwd(), localDir)
     const bucketDeployment = new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: bucket,
-      destinationKeyPrefix: localDir,
-      source: Source.asset(absolutePath),
+      destinationKeyPrefix: dirName,
+      source: Source.asset(source),
     })
 
     return bucket
   }
 
-  private createDocumentToDeploy(scope: Construct, s3Path: string) {
+  private createDocumentToDeploy(scope: Construct, source: string) {
+    const dirName = `${path.basename(source)}/`
+    const s3Path = `${this.bucket.bucketName}/${dirName}`
+
     const commands = [
       "#!/bin/bash",
       "set -eux",
