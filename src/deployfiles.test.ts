@@ -3,8 +3,9 @@ import { Schedule } from "@aws-cdk/aws-events"
 import { Role, ServicePrincipal } from "@aws-cdk/aws-iam"
 
 import { Stack } from "@aws-cdk/core"
-
 import { DeployFiles } from "./deployfiles"
+
+import * as path from "path"
 
 describe("deployfiles", () => {
   test("default", () => {
@@ -15,7 +16,7 @@ describe("deployfiles", () => {
 
     const deployFiles = new DeployFiles(stack, "DeployFiles", {
       instanceRole,
-      source: "examples/",
+      source: path.join(process.cwd(), "examples/"),
       targets: [
         {
           key: "aws:cloudformation:stack-name",
@@ -36,7 +37,7 @@ describe("deployfiles", () => {
     const deployFiles = new DeployFiles(stack, "DeployFiles", {
       instanceRole,
       schedule: Schedule.cron({ minute: "0", hour: "10" }),
-      source: "examples/",
+      source: path.join(process.cwd(), "examples/"),
       targets: [
         {
           key: "aws:cloudformation:stack-name",
