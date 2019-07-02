@@ -81,8 +81,6 @@ export class DeployFiles extends Construct {
     instanceRole: Role,
     source: string
   ) {
-    const dirName = `${path.basename(source)}/`
-
     const bucket = new Bucket(scope, "BucketToDeploy", {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     })
@@ -92,9 +90,11 @@ export class DeployFiles extends Construct {
     s3Policy.addResources(bucket.bucketArn, bucket.arnForObjects("*"))
     instanceRole.addToPolicy(s3Policy)
 
+    const dirName = path.basename(source)
+
     const bucketDeployment = new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: bucket,
-      destinationKeyPrefix: dirName,
+      destinationKeyPrefix: `${dirName}/`,
       source: Source.asset(source),
     })
 
@@ -102,8 +102,8 @@ export class DeployFiles extends Construct {
   }
 
   private createDocumentToDeploy(scope: Construct, source: string) {
-    const dirName = `${path.basename(source)}/`
-    const s3Path = `${this.bucket.bucketName}/${dirName}`
+    const dirName = path.basename(source)
+    const s3Path = `${this.bucket.bucketName}/${dirName}/`
 
     const commands = [
       "#!/bin/bash",
