@@ -15,10 +15,7 @@ describe("deployfiles", () => {
       assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
     })
 
-    // const bucket = new Bucket(stack, "Bucket")
-
     const deployFiles = new DeployFiles(stack, "DeployFiles", {
-      // bucket,
       instanceRole,
       source: path.join(process.cwd(), "examples/"),
       targets: [
