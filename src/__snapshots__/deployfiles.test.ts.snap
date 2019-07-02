@@ -577,20 +577,6 @@ Object {
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": Array [
-          Object {
-            "Fn::Join": Array [
-              "",
-              Array [
-                "arn:",
-                Object {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-              ],
-            ],
-          },
-        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -686,7 +672,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.197--",
+            "Id": "--Token-TOKEN.195--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
@@ -1288,20 +1274,6 @@ Object {
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": Array [
-          Object {
-            "Fn::Join": Array [
-              "",
-              Array [
-                "arn:",
-                Object {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-              ],
-            ],
-          },
-        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -1397,7 +1369,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.83--",
+            "Id": "--Token-TOKEN.82--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
