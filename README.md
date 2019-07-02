@@ -7,8 +7,6 @@
 - A ECS cluster configuration such as userdata
 ### DeployFiles
 - Deploy local files to all instances of the ECS cluster
-### ScalingPlan
-- CPU-based auto-scaling configuration using AWS Auto Scaling
 
 ## Synopsis
 
@@ -17,8 +15,8 @@ import { SynthUtils } from "@aws-cdk/assert"
 import { InstanceClass, InstanceSize, Vpc } from "@aws-cdk/aws-ec2"
 import { Role } from "@aws-cdk/aws-iam"
 import { Stack } from "@aws-cdk/core"
-
 import { Ec2Cluster, DeployFiles, ScalingPlan } from '@cohalz/cirrocumulus'
+import * as path from "path"
 
 const stack = new Stack()
 const vpc = new Vpc(stack, "VPC")
@@ -39,7 +37,7 @@ const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
 
 const deployFiles = new DeployFiles(stack, "UpdateFiles", {
   instanceRole,
-  source: "examples/",
+  source: path.join(process.cwd(), "examples/"),
   targets: [
     {
       key: "tag:ClusterName",
