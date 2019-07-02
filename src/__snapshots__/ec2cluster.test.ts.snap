@@ -78,6 +78,22 @@ Object {
         },
       },
     },
+    "AutoScalingGroupDrainECSHookFunctionAllowInvokeAutoScalingGroupLifecycleHookDrainHookTopicC29055AAF2C85C62": Object {
+      "Properties": Object {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "AutoScalingGroupDrainECSHookFunctionB9B9F734": Object {
       "DependsOn": Array [
         "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
@@ -300,21 +316,20 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Policy",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicCCDE854C": Object {
+    "AutoScalingGroupDrainECSHookFunctionTopic97FF7074": Object {
       "Properties": Object {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
+        "Endpoint": Object {
           "Fn::GetAtt": Array [
             "AutoScalingGroupDrainECSHookFunctionB9B9F734",
             "Arn",
           ],
         },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "Protocol": "lambda",
+        "TopicArn": Object {
           "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
         },
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SNS::Subscription",
     },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
@@ -636,21 +651,6 @@ aws ec2 create-tags --region ",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
-    },
-    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
     },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
@@ -1093,6 +1093,22 @@ Object {
         },
       },
     },
+    "AutoScalingGroupDrainECSHookFunctionAllowInvokeAutoScalingGroupLifecycleHookDrainHookTopicC29055AAF2C85C62": Object {
+      "Properties": Object {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "AutoScalingGroupDrainECSHookFunctionB9B9F734": Object {
       "DependsOn": Array [
         "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
@@ -1315,21 +1331,20 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Policy",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicCCDE854C": Object {
+    "AutoScalingGroupDrainECSHookFunctionTopic97FF7074": Object {
       "Properties": Object {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
+        "Endpoint": Object {
           "Fn::GetAtt": Array [
             "AutoScalingGroupDrainECSHookFunctionB9B9F734",
             "Arn",
           ],
         },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "Protocol": "lambda",
+        "TopicArn": Object {
           "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
         },
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SNS::Subscription",
     },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
@@ -1661,21 +1676,6 @@ echo ECS_CLUSTER=",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
-    },
-    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
     },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
@@ -2118,6 +2118,22 @@ Object {
         },
       },
     },
+    "AutoScalingGroupDrainECSHookFunctionAllowInvokeAutoScalingGroupLifecycleHookDrainHookTopicC29055AAF2C85C62": Object {
+      "Properties": Object {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "AutoScalingGroupDrainECSHookFunctionB9B9F734": Object {
       "DependsOn": Array [
         "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
@@ -2340,21 +2356,20 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Policy",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicCCDE854C": Object {
+    "AutoScalingGroupDrainECSHookFunctionTopic97FF7074": Object {
       "Properties": Object {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
+        "Endpoint": Object {
           "Fn::GetAtt": Array [
             "AutoScalingGroupDrainECSHookFunctionB9B9F734",
             "Arn",
           ],
         },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "Protocol": "lambda",
+        "TopicArn": Object {
           "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
         },
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SNS::Subscription",
     },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
@@ -2700,21 +2715,6 @@ aws ec2 create-tags --region ",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
-    },
-    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
     },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
@@ -3157,6 +3157,22 @@ Object {
         },
       },
     },
+    "AutoScalingGroupDrainECSHookFunctionAllowInvokeAutoScalingGroupLifecycleHookDrainHookTopicC29055AAF2C85C62": Object {
+      "Properties": Object {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": Object {
+          "Fn::GetAtt": Array [
+            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
+            "Arn",
+          ],
+        },
+        "Principal": "sns.amazonaws.com",
+        "SourceArn": Object {
+          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "AutoScalingGroupDrainECSHookFunctionB9B9F734": Object {
       "DependsOn": Array [
         "AutoScalingGroupDrainECSHookFunctionServiceRoleDefaultPolicy602FB07A",
@@ -3379,21 +3395,20 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Policy",
     },
-    "AutoScalingGroupDrainECSHookFunctionTopicCCDE854C": Object {
+    "AutoScalingGroupDrainECSHookFunctionTopic97FF7074": Object {
       "Properties": Object {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
+        "Endpoint": Object {
           "Fn::GetAtt": Array [
             "AutoScalingGroupDrainECSHookFunctionB9B9F734",
             "Arn",
           ],
         },
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "Protocol": "lambda",
+        "TopicArn": Object {
           "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
         },
       },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::SNS::Subscription",
     },
     "AutoScalingGroupInstanceProfile342FAC7C": Object {
       "Properties": Object {
@@ -3715,21 +3730,6 @@ aws ec2 create-tags --region ",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
       "Type": "AWS::SNS::Topic",
-    },
-    "AutoScalingGroupLifecycleHookDrainHookTopicFunction16FF74CD": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
-            "AutoScalingGroupDrainECSHookFunctionB9B9F734",
-            "Arn",
-          ],
-        },
-        "Protocol": "lambda",
-        "TopicArn": Object {
-          "Ref": "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
     },
     "Ec2Cluster796ACAF5": Object {
       "Type": "AWS::ECS::Cluster",
