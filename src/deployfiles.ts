@@ -1,11 +1,6 @@
 import { ReadWriteType, Trail } from "@aws-cdk/aws-cloudtrail"
 import { IRuleTarget, Rule, Schedule } from "@aws-cdk/aws-events"
-import {
-  ManagedPolicy,
-  PolicyStatement,
-  Role,
-  ServicePrincipal,
-} from "@aws-cdk/aws-iam"
+import { PolicyStatement, Role, ServicePrincipal } from "@aws-cdk/aws-iam"
 import { BlockPublicAccess, Bucket } from "@aws-cdk/aws-s3"
 import { BucketDeployment, Source } from "@aws-cdk/aws-s3-deployment"
 import { CfnAssociation, CfnDocument } from "@aws-cdk/aws-ssm"
@@ -69,10 +64,6 @@ export class DeployFiles extends Construct {
     this.addS3Policy(props.instanceRole)
 
     this.deployToS3(scope, props.source, props.s3Prefix)
-
-    props.instanceRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
-    )
 
     const s3Prefix = props.s3Prefix ? props.s3Prefix : ""
 

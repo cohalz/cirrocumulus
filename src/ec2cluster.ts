@@ -13,7 +13,12 @@ import {
   UserData,
 } from "@aws-cdk/aws-ec2"
 import { Cluster, EcsOptimizedAmi } from "@aws-cdk/aws-ecs"
-import { CfnInstanceProfile, PolicyStatement } from "@aws-cdk/aws-iam"
+import {
+  CfnInstanceProfile,
+  ManagedPolicy,
+  PolicyStatement,
+  Role,
+} from "@aws-cdk/aws-iam"
 import { Aws, Construct, Fn } from "@aws-cdk/core"
 import { ImportedImage } from "./lib/imported-image"
 
@@ -160,6 +165,13 @@ export class Ec2Cluster extends Construct {
     instancePolicy.addActions("ec2:CreateTags", "ec2:DescribeInstances")
     instancePolicy.addAllResources()
     this.autoScalingGroup.addToRolePolicy(instancePolicy)
+
+    const instanceRole = this.autoScalingGroup.node.findChild(
+      "InstanceRole"
+    ) as Role
+    instanceRole.addManagedPolicy(
+      ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
+    )
 
     const tags = [
       {
