@@ -39,11 +39,17 @@ export interface DeployFilesProps {
    */
   readonly schedule?: Schedule
 
+  /**
+   * The S3 bucket
+   *
+   * @default a new bucket will be created
+   */
   readonly bucket?: Bucket
 
   /**
    * Key prefix in the s3 bucket
    *
+   * @default "" (deploy to root of the destination bucket)
    */
   readonly s3Prefix?: string
 }
