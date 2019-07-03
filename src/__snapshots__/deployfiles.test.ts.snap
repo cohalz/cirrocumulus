@@ -101,61 +101,6 @@ Object {
       },
       "Type": "Custom::CDKBucketDeployment",
     },
-    "BucketPolicyE9A3008A": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "Bucket83908E77",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:Get*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "ec2.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
-              },
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "Bucket83908E77",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "Bucket83908E77",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
         "CloudTrailToDeployS3Policy3F1D1743",
@@ -718,7 +663,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.419--",
+            "Id": "--Token-TOKEN.407--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
@@ -852,61 +797,6 @@ Object {
         },
       },
       "Type": "AWS::S3::Bucket",
-    },
-    "BucketToDeployPolicy5D68BF1C": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "BucketToDeploy91F87F54",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:Get*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "ec2.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
-              },
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "BucketToDeploy91F87F54",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "BucketToDeploy91F87F54",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -1470,7 +1360,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.303--",
+            "Id": "--Token-TOKEN.294--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
@@ -1606,61 +1496,6 @@ Object {
       },
       "Type": "AWS::S3::Bucket",
     },
-    "BucketToDeployPolicy5D68BF1C": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "BucketToDeploy91F87F54",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:Get*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "ec2.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
-              },
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "BucketToDeploy91F87F54",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "BucketToDeploy91F87F54",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
         "CloudTrailToDeployS3Policy3F1D1743",
@@ -2223,7 +2058,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.187--",
+            "Id": "--Token-TOKEN.181--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
@@ -2358,61 +2193,6 @@ Object {
       },
       "Type": "AWS::S3::Bucket",
     },
-    "BucketToDeployPolicy5D68BF1C": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "BucketToDeploy91F87F54",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:Get*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "ec2.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
-              },
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "BucketToDeploy91F87F54",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "BucketToDeploy91F87F54",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
         "CloudTrailToDeployS3Policy3F1D1743",
@@ -2975,7 +2755,7 @@ Object {
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.71--",
+            "Id": "--Token-TOKEN.68--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",

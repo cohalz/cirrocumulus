@@ -55,13 +55,6 @@ export class DeployFiles extends Construct {
           blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
         })
 
-    const policy = new PolicyStatement({
-      actions: ["s3:Get*", "s3:List*"],
-      principals: [new ServicePrincipal("ec2.amazonaws.com")],
-      resources: [this.bucket.bucketArn, this.bucket.arnForObjects("*")],
-    })
-    this.bucket.addToResourcePolicy(policy)
-
     this.deployToS3(scope, props.source, props.s3Prefix)
 
     const s3Prefix = props.s3Prefix ? props.s3Prefix : ""
