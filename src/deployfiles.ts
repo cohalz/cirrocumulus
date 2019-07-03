@@ -52,8 +52,8 @@ export class DeployFiles extends Construct {
     this.bucket = props.bucket
       ? props.bucket
       : new Bucket(scope, "BucketToDeploy", {
-        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-      })
+          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        })
 
     const policy = new PolicyStatement({
       actions: ["s3:Get*", "s3:List*"],
