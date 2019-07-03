@@ -437,35 +437,6 @@ def pick(dct, *keys):
               "Effect": "Allow",
               "Resource": "*",
             },
-            Object {
-              "Action": Array [
-                "s3:Get*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "BucketToDeploy91F87F54",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "BucketToDeploy91F87F54",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -785,6 +756,61 @@ aws ec2 create-tags --region ",
         },
       },
       "Type": "AWS::S3::Bucket",
+    },
+    "BucketToDeployPolicy5D68BF1C": Object {
+      "Properties": Object {
+        "Bucket": Object {
+          "Ref": "BucketToDeploy91F87F54",
+        },
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "s3:Get*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "ec2.",
+                      Object {
+                        "Ref": "AWS::URLSuffix",
+                      },
+                    ],
+                  ],
+                },
+              },
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "BucketToDeploy91F87F54",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      Object {
+                        "Fn::GetAtt": Array [
+                          "BucketToDeploy91F87F54",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -1279,7 +1305,7 @@ aws ec2 create-tags --region ",
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.229--",
+            "Id": "--Token-TOKEN.232--",
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
