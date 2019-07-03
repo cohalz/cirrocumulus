@@ -16,12 +16,6 @@ export interface DeployFilesProps {
   readonly source: string
 
   /**
-   * The instance role
-   *
-   */
-  readonly instanceRole: Role
-
-  /**
    * The targets that the SSM document sends commands to
    *
    */
@@ -58,10 +52,15 @@ export class DeployFiles extends Construct {
     this.bucket = props.bucket
       ? props.bucket
       : new Bucket(scope, "BucketToDeploy", {
-          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-        })
+        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      })
 
-    this.addS3Policy(props.instanceRole)
+    const policy = new PolicyStatement({
+      actions: ["s3:Get*", "s3:List*"],
+      principals: [new ServicePrincipal("ec2.amazonaws.com")],
+      resources: [this.bucket.bucketArn, this.bucket.arnForObjects("*")],
+    })
+    this.bucket.addToResourcePolicy(policy)
 
     this.deployToS3(scope, props.source, props.s3Prefix)
 
@@ -87,11 +86,12 @@ export class DeployFiles extends Construct {
     })
   }
 
-  private addS3Policy(instanceRole: Role) {
+  public deployPolicy() {
     const s3Policy = new PolicyStatement()
     s3Policy.addActions("s3:Get*", "s3:List*")
     s3Policy.addResources(this.bucket.bucketArn, this.bucket.arnForObjects("*"))
-    instanceRole.addToPolicy(s3Policy)
+
+    return s3Policy
   }
 
   private deployToS3(scope: Construct, source: string, s3Prefix?: string) {
