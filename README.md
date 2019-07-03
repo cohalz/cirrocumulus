@@ -31,10 +31,6 @@ const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
   vpc,
 })
 
-const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
-  "InstanceRole"
-) as Role
-
 const deployFiles = new DeployFiles(stack, "UpdateFiles", {
   instanceRole,
   source: path.join(process.cwd(), "examples/"),
@@ -45,6 +41,11 @@ const deployFiles = new DeployFiles(stack, "UpdateFiles", {
     },
   ],
 })
+
+const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
+  "InstanceRole"
+) as Role
+instanceRole.addToPolicy(deployFiles.deployPolicy())
 
 const ecsService = new ecsPatterns.LoadBalancedEc2Service(this, "Ec2Service", {
   cluster: ec2Cluster.cluster,
