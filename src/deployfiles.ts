@@ -16,12 +16,6 @@ export interface DeployFilesProps {
   readonly source: string
 
   /**
-   * The instance role
-   *
-   */
-  readonly instanceRole: Role
-
-  /**
    * The targets that the SSM document sends commands to
    *
    */
@@ -33,6 +27,20 @@ export interface DeployFilesProps {
    * @default Do not schedule
    */
   readonly schedule?: Schedule
+
+  /**
+   * The S3 bucket
+   *
+   * @default a new bucket will be created
+   */
+  readonly bucket?: Bucket
+
+  /**
+   * Key prefix in the s3 bucket
+   *
+   * @default "" (deploy to root of the destination bucket)
+   */
+  readonly s3Prefix?: string
 }
 
 export class DeployFiles extends Construct {
@@ -41,13 +49,17 @@ export class DeployFiles extends Construct {
   constructor(scope: Construct, id: string, props: DeployFilesProps) {
     super(scope, id)
 
-    this.bucket = this.createBucketToDeploy(
-      scope,
-      props.instanceRole,
-      props.source
-    )
+    this.bucket = props.bucket
+      ? props.bucket
+      : new Bucket(scope, "BucketToDeploy", {
+          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        })
 
-    const document = this.createDocumentToDeploy(scope, props.source)
+    this.deployToS3(scope, props.source, props.s3Prefix)
+
+    const s3Prefix = props.s3Prefix ? props.s3Prefix : ""
+
+    const document = this.createDocumentToDeploy(scope, s3Prefix)
 
     this.createEventToAutoDeploy(
       scope,
@@ -67,34 +79,28 @@ export class DeployFiles extends Construct {
     })
   }
 
-  private createBucketToDeploy(
-    scope: Construct,
-    instanceRole: Role,
-    source: string
-  ) {
-    const bucket = new Bucket(scope, "BucketToDeploy", {
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-    })
-
+  public deployPolicy() {
     const s3Policy = new PolicyStatement()
     s3Policy.addActions("s3:Get*", "s3:List*")
-    s3Policy.addResources(bucket.bucketArn, bucket.arnForObjects("*"))
-    instanceRole.addToPolicy(s3Policy)
+    s3Policy.addResources(this.bucket.bucketArn, this.bucket.arnForObjects("*"))
 
-    const dirName = path.basename(source)
-
-    const bucketDeployment = new BucketDeployment(scope, "BucketDeployment", {
-      destinationBucket: bucket,
-      destinationKeyPrefix: `${dirName}/`,
-      source: Source.asset(source),
-    })
-
-    return bucket
+    return s3Policy
   }
 
-  private createDocumentToDeploy(scope: Construct, source: string) {
-    const dirName = path.basename(source)
-    const s3Path = `${this.bucket.bucketName}/${dirName}/`
+  private deployToS3(scope: Construct, source: string, s3Prefix?: string) {
+    const destinationKeyPrefix = s3Prefix
+      ? s3Prefix
+      : `${path.basename(source)}/`
+
+    return new BucketDeployment(scope, "BucketDeployment", {
+      destinationBucket: this.bucket,
+      destinationKeyPrefix,
+      source: Source.asset(source),
+    })
+  }
+
+  private createDocumentToDeploy(scope: Construct, s3Prefix: string) {
+    const s3Path = `${this.bucket.bucketName}/${s3Prefix}`
 
     const commands = [
       "#!/bin/bash",

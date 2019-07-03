@@ -21,12 +21,7 @@ describe("ec2cluster", () => {
       vpc,
     })
 
-    const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
-      "InstanceRole"
-    ) as Role
-
     const deployFiles = new DeployFiles(stack, "UpdateFiles", {
-      instanceRole,
       source: "examples/",
       targets: [
         {
@@ -35,6 +30,11 @@ describe("ec2cluster", () => {
         },
       ],
     })
+
+    const instanceRole = ec2Cluster.autoScalingGroup.node.findChild(
+      "InstanceRole"
+    ) as Role
+    instanceRole.addToPolicy(deployFiles.deployPolicy())
 
     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
   })
