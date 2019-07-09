@@ -390,7 +390,7 @@ def pick(dct, *keys):
                 Object {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
               ],
             ],
           },
@@ -1435,7 +1435,7 @@ def pick(dct, *keys):
                 Object {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
               ],
             ],
           },
@@ -2490,7 +2490,7 @@ def pick(dct, *keys):
                 Object {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
               ],
             ],
           },
@@ -3559,7 +3559,7 @@ def pick(dct, *keys):
                 Object {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
               ],
             ],
           },
