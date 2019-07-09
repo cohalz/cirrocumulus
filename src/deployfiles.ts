@@ -88,13 +88,9 @@ export class DeployFiles extends Construct {
   }
 
   private deployToS3(scope: Construct, source: string, s3Prefix?: string) {
-    const destinationKeyPrefix = s3Prefix
-      ? s3Prefix
-      : `${path.basename(source)}/`
-
     return new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: this.bucket,
-      destinationKeyPrefix,
+      destinationKeyPrefix: s3Prefix,
       source: Source.asset(source),
     })
   }

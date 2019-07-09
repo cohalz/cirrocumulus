@@ -741,7 +741,6 @@ aws ec2 create-tags --region ",
     "BucketDeploymentCustomResourceCB7E2133": Object {
       "DeletionPolicy": "Delete",
       "Properties": Object {
-        "DestinationBucketKeyPrefix": "examples/",
         "DestinationBucketName": Object {
           "Ref": "BucketToDeploy91F87F54",
         },
