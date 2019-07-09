@@ -320,8 +320,6 @@ def pick(dct, *keys):
                 "ecs:ListContainerInstances",
                 "ecs:SubmitContainerStateChange",
                 "ecs:SubmitTaskStateChange",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
               ],
               "Effect": "Allow",
               "Resource": Object {
@@ -330,6 +328,24 @@ def pick(dct, *keys):
                   "Arn",
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Condition": Object {
+                "ArnEquals": Object {
+                  "ecs:cluster": Object {
+                    "Fn::GetAtt": Array [
+                      "Ec2Cluster796ACAF5",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -773,6 +789,7 @@ aws ec2 create-tags --region ",
         },
       },
       "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "BucketToDeploy91F87F54": Object {
       "DeletionPolicy": "Retain",
@@ -785,6 +802,7 @@ aws ec2 create-tags --region ",
         },
       },
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -834,6 +852,7 @@ aws ec2 create-tags --region ",
     "CloudTrailToDeployS385FF9393": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeployS3Policy3F1D1743": Object {
       "Properties": Object {

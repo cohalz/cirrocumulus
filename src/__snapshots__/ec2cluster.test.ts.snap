@@ -293,8 +293,6 @@ def pick(dct, *keys):
                 "ecs:ListContainerInstances",
                 "ecs:SubmitContainerStateChange",
                 "ecs:SubmitTaskStateChange",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
               ],
               "Effect": "Allow",
               "Resource": Object {
@@ -303,6 +301,24 @@ def pick(dct, *keys):
                   "Arn",
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Condition": Object {
+                "ArnEquals": Object {
+                  "ecs:cluster": Object {
+                    "Fn::GetAtt": Array [
+                      "Ec2Cluster796ACAF5",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -1322,8 +1338,6 @@ def pick(dct, *keys):
                 "ecs:ListContainerInstances",
                 "ecs:SubmitContainerStateChange",
                 "ecs:SubmitTaskStateChange",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
               ],
               "Effect": "Allow",
               "Resource": Object {
@@ -1332,6 +1346,24 @@ def pick(dct, *keys):
                   "Arn",
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Condition": Object {
+                "ArnEquals": Object {
+                  "ecs:cluster": Object {
+                    "Fn::GetAtt": Array [
+                      "Ec2Cluster796ACAF5",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -2361,8 +2393,6 @@ def pick(dct, *keys):
                 "ecs:ListContainerInstances",
                 "ecs:SubmitContainerStateChange",
                 "ecs:SubmitTaskStateChange",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
               ],
               "Effect": "Allow",
               "Resource": Object {
@@ -2371,6 +2401,24 @@ def pick(dct, *keys):
                   "Arn",
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Condition": Object {
+                "ArnEquals": Object {
+                  "ecs:cluster": Object {
+                    "Fn::GetAtt": Array [
+                      "Ec2Cluster796ACAF5",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -3414,8 +3462,6 @@ def pick(dct, *keys):
                 "ecs:ListContainerInstances",
                 "ecs:SubmitContainerStateChange",
                 "ecs:SubmitTaskStateChange",
-                "ecs:UpdateContainerInstancesState",
-                "ecs:ListTasks",
               ],
               "Effect": "Allow",
               "Resource": Object {
@@ -3424,6 +3470,24 @@ def pick(dct, *keys):
                   "Arn",
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "ecs:UpdateContainerInstancesState",
+                "ecs:ListTasks",
+              ],
+              "Condition": Object {
+                "ArnEquals": Object {
+                  "ecs:cluster": Object {
+                    "Fn::GetAtt": Array [
+                      "Ec2Cluster796ACAF5",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",

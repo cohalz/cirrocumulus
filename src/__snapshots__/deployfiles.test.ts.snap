@@ -48,6 +48,7 @@ Object {
     "Bucket83908E77": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "BucketDeploymentCustomResourceCB7E2133": Object {
       "DeletionPolicy": "Delete",
@@ -100,6 +101,7 @@ Object {
         },
       },
       "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -149,6 +151,7 @@ Object {
     "CloudTrailToDeployS385FF9393": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeployS3Policy3F1D1743": Object {
       "Properties": Object {
@@ -785,6 +788,7 @@ Object {
         },
       },
       "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "BucketToDeploy91F87F54": Object {
       "DeletionPolicy": "Retain",
@@ -797,6 +801,7 @@ Object {
         },
       },
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -846,6 +851,7 @@ Object {
     "CloudTrailToDeployS385FF9393": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeployS3Policy3F1D1743": Object {
       "Properties": Object {
@@ -1483,6 +1489,7 @@ Object {
         },
       },
       "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "BucketToDeploy91F87F54": Object {
       "DeletionPolicy": "Retain",
@@ -1495,6 +1502,7 @@ Object {
         },
       },
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -1544,6 +1552,7 @@ Object {
     "CloudTrailToDeployS385FF9393": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeployS3Policy3F1D1743": Object {
       "Properties": Object {
@@ -2180,6 +2189,7 @@ Object {
         },
       },
       "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "BucketToDeploy91F87F54": Object {
       "DeletionPolicy": "Retain",
@@ -2192,6 +2202,7 @@ Object {
         },
       },
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeploy3F1E66BD": Object {
       "DependsOn": Array [
@@ -2241,6 +2252,7 @@ Object {
     "CloudTrailToDeployS385FF9393": Object {
       "DeletionPolicy": "Retain",
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "CloudTrailToDeployS3Policy3F1D1743": Object {
       "Properties": Object {
