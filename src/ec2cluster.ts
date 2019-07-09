@@ -170,7 +170,7 @@ export class Ec2Cluster extends Construct {
       "InstanceRole"
     ) as Role
     instanceRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
+      ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     )
 
     const tags = [
