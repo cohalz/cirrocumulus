@@ -28,10 +28,7 @@ export interface InstancePair {
 }
 
 export interface Ec2ClusterProps
-  extends Pick<
-    AutoScalingGroupProps,
-    Exclude<keyof AutoScalingGroupProps, "instanceType" | "machineImage">
-  > {
+  extends Omit<AutoScalingGroupProps, "instanceType" | "machineImage"> {
   /**
    * The instance types
    *
