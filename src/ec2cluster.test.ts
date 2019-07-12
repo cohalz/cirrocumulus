@@ -1,7 +1,5 @@
 import { SynthUtils } from "@aws-cdk/assert"
 import {
-  InstanceClass,
-  InstanceSize,
   InstanceType,
   UserData,
   Vpc,
