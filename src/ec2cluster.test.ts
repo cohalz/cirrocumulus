@@ -1,5 +1,11 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import { InstanceClass, InstanceSize, UserData, Vpc } from "@aws-cdk/aws-ec2"
+import {
+  InstanceClass,
+  InstanceSize,
+  InstanceType,
+  UserData,
+  Vpc,
+} from "@aws-cdk/aws-ec2"
 import { Stack } from "@aws-cdk/core"
 
 import { Ec2Cluster } from "./ec2cluster"
@@ -10,12 +16,7 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instancePairs: [
-        {
-          class: InstanceClass.T3,
-          size: InstanceSize.MEDIUM,
-        },
-      ],
+      instanceTypes: [new InstanceType("t3.medium")],
       vpc,
     })
 
@@ -27,15 +28,9 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instancePairs: [
-        {
-          class: InstanceClass.T3,
-          size: InstanceSize.MEDIUM,
-        },
-        {
-          class: InstanceClass.T2,
-          size: InstanceSize.MEDIUM,
-        },
+      instanceTypes: [
+        new InstanceType("t3.medium"),
+        new InstanceType("t2.medium"),
       ],
       onDemandPercentage: 20,
       vpc,
@@ -52,12 +47,7 @@ describe("ec2cluster", () => {
     userData.addCommands("echo 1", "echo 2")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instancePairs: [
-        {
-          class: InstanceClass.T3,
-          size: InstanceSize.MEDIUM,
-        },
-      ],
+      instanceTypes: [new InstanceType("t3.medium")],
       userData,
       vpc,
     })
@@ -70,12 +60,7 @@ describe("ec2cluster", () => {
     const vpc = new Vpc(stack, "VPC")
 
     const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-      instancePairs: [
-        {
-          class: InstanceClass.T3,
-          size: InstanceSize.MEDIUM,
-        },
-      ],
+      instanceTypes: [new InstanceType("t3.medium")],
       tags: {
         Env: "develop",
         Service: "example",
@@ -93,12 +78,7 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instancePairs: [
-          {
-            class: InstanceClass.T3,
-            size: InstanceSize.MEDIUM,
-          },
-        ],
+        instanceTypes: [new InstanceType("t3.medium")],
         onDemandPercentage: 20,
         vpc,
       })
@@ -115,12 +95,7 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instancePairs: [
-          {
-            class: InstanceClass.T3,
-            size: InstanceSize.MEDIUM,
-          },
-        ],
+        instanceTypes: [new InstanceType("t3.medium")],
         onDemandPercentage: 0,
         vpc,
       })
@@ -137,15 +112,9 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instancePairs: [
-          {
-            class: InstanceClass.T3,
-            size: InstanceSize.MEDIUM,
-          },
-          {
-            class: InstanceClass.T2,
-            size: InstanceSize.MEDIUM,
-          },
+        instanceTypes: [
+          new InstanceType("t3.medium"),
+          new InstanceType("t2.medium"),
         ],
         vpc,
       })
@@ -162,15 +131,9 @@ describe("ec2cluster", () => {
 
     expect(() => {
       const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
-        instancePairs: [
-          {
-            class: InstanceClass.T3,
-            size: InstanceSize.MEDIUM,
-          },
-          {
-            class: InstanceClass.T2,
-            size: InstanceSize.MEDIUM,
-          },
+        instanceTypes: [
+          new InstanceType("t3.medium"),
+          new InstanceType("t2.medium"),
         ],
         onDemandPercentage: 100,
         vpc,
