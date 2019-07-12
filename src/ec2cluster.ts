@@ -6,8 +6,6 @@ import {
 } from "@aws-cdk/aws-autoscaling"
 import {
   CfnLaunchTemplate,
-  InstanceClass,
-  InstanceSize,
   InstanceType,
   SecurityGroup,
   UserData,
@@ -22,11 +20,6 @@ import {
 import { Aws, Construct, Fn } from "@aws-cdk/core"
 import { ImportedImage } from "./lib/imported-image"
 
-export interface InstancePair {
-  readonly class: InstanceClass
-  readonly size: InstanceSize
-}
-
 export interface Ec2ClusterProps
   extends Omit<AutoScalingGroupProps, "instanceType" | "machineImage"> {
   /**
@@ -34,7 +27,7 @@ export interface Ec2ClusterProps
    *
    * When using spot instances, must set multiple instance types
    */
-  readonly instancePairs: InstancePair[]
+  readonly instanceTypes: InstanceType[]
 
   /**
    * A name for the cluster
@@ -100,14 +93,14 @@ export class Ec2Cluster extends Construct {
 
     const launchTemplate = this.createLaunchTemplate(
       scope,
-      props.instancePairs[0],
+      props.instanceTypes[0],
       userData,
       props.tags
     )
 
     this.useLaunchTemplate(
       launchTemplate,
-      props.instancePairs,
+      props.instanceTypes,
       props.onDemandPercentage
     )
 
@@ -118,22 +111,19 @@ export class Ec2Cluster extends Construct {
     scope: Construct,
     props: Ec2ClusterProps
   ) => {
-    if (this.onDemandOnly && props.instancePairs.length > 1) {
+    if (this.onDemandOnly && props.instanceTypes.length > 1) {
       throw new Error(
         "When using on-demand instances, please set single instance type."
       )
     }
-    if (!this.onDemandOnly && props.instancePairs.length <= 1) {
+    if (!this.onDemandOnly && props.instanceTypes.length <= 1) {
       throw new Error(
         "When using spot instances, please set multiple instance types."
       )
     }
 
     return new AutoScalingGroup(scope, "AutoScalingGroup", {
-      instanceType: InstanceType.of(
-        props.instancePairs[0].class,
-        props.instancePairs[0].size
-      ),
+      instanceType: props.instanceTypes[0],
       machineImage: new ImportedImage(this.amiId),
       updateType: UpdateType.REPLACING_UPDATE,
       ...props,
@@ -142,7 +132,7 @@ export class Ec2Cluster extends Construct {
 
   private createLaunchTemplate(
     scope: Construct,
-    instancePair: InstancePair,
+    instanceType: InstanceType,
     userData: UserData,
     extraTags?: { [key: string]: string }
   ) {
@@ -187,10 +177,7 @@ export class Ec2Cluster extends Construct {
       launchTemplateData: {
         iamInstanceProfile: { name: cfnInstanceProfile.ref },
         imageId: this.amiId,
-        instanceType: InstanceType.of(
-          instancePair.class,
-          instancePair.size
-        ).toString(),
+        instanceType: instanceType.toString(),
         securityGroupIds: [securityGroup.securityGroupId],
         tagSpecifications: [
           {
@@ -299,7 +286,7 @@ export class Ec2Cluster extends Construct {
   // use LaunchTemplate instead of LaunchConfiguration
   private useLaunchTemplate = (
     launchTemplate: CfnLaunchTemplate,
-    instancePairs: InstancePair[],
+    instanceTypes: InstanceType[],
     onDemandPercentage?: number
   ) => {
     const cfnAsg = this.autoScalingGroup.node.findChild(
@@ -324,11 +311,8 @@ export class Ec2Cluster extends Construct {
             LaunchTemplateId: launchTemplate.ref,
             Version: launchTemplate.attrLatestVersionNumber,
           },
-          Overrides: instancePairs.map(instancePair => ({
-            InstanceType: InstanceType.of(
-              instancePair.class,
-              instancePair.size
-            ).toString(),
+          Overrides: instanceTypes.map(instanceType => ({
+            InstanceType: instanceType.toString(),
           })),
         },
       })
