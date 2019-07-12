@@ -1,9 +1,5 @@
 import { SynthUtils } from "@aws-cdk/assert"
-import {
-  InstanceType,
-  UserData,
-  Vpc,
-} from "@aws-cdk/aws-ec2"
+import { InstanceType, UserData, Vpc } from "@aws-cdk/aws-ec2"
 import { Stack } from "@aws-cdk/core"
 
 import { Ec2Cluster } from "./ec2cluster"
