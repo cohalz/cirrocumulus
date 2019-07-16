@@ -27,7 +27,6 @@ const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
 })
 
 const deployFiles = new DeployFiles(stack, "UpdateFiles", {
-  instanceRole,
   source: path.join(process.cwd(), "examples/"),
   targets: [
     {
