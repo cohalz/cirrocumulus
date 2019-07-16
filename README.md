@@ -26,7 +26,7 @@ const ec2Cluster = new Ec2Cluster(stack, "Ec2Cluster", {
   vpc,
 })
 
-const deployFiles = new DeployFiles(stack, "UpdateFiles", {
+const deployFiles = new DeployFiles(stack, "DeployFiles", {
   source: path.join(process.cwd(), "examples/"),
   targets: [
     {
