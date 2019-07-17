@@ -2,6 +2,9 @@
 
 ![Build Status](https://travis-ci.org/cohalz/cirrocumulus.png?branch=master)
 
+## Install
+`npm i -D @cohalz/cirrocumulus`
+
 ## Libraries
 ### Ec2Cluster
 - A ECS cluster configuration such as userdata
