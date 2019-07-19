@@ -149,7 +149,11 @@ export class Ec2Cluster extends Construct {
     ) as SecurityGroup
 
     const instancePolicy = new PolicyStatement()
-    instancePolicy.addActions("ec2:CreateTags", "ec2:DescribeInstances")
+    instancePolicy.addActions(
+      "ec2:CreateTags",
+      "ec2:DescribeInstances",
+      "cloudwatch:GetMetricStatistics"
+    )
     instancePolicy.addAllResources()
     this.autoScalingGroup.addToRolePolicy(instancePolicy)
 

@@ -422,6 +422,7 @@ def pick(dct, *keys):
               "Action": Array [
                 "ec2:CreateTags",
                 "ec2:DescribeInstances",
+                "cloudwatch:GetMetricStatistics",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -1467,6 +1468,7 @@ def pick(dct, *keys):
               "Action": Array [
                 "ec2:CreateTags",
                 "ec2:DescribeInstances",
+                "cloudwatch:GetMetricStatistics",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -2522,6 +2524,7 @@ def pick(dct, *keys):
               "Action": Array [
                 "ec2:CreateTags",
                 "ec2:DescribeInstances",
+                "cloudwatch:GetMetricStatistics",
               ],
               "Effect": "Allow",
               "Resource": "*",
@@ -3591,6 +3594,7 @@ def pick(dct, *keys):
               "Action": Array [
                 "ec2:CreateTags",
                 "ec2:DescribeInstances",
+                "cloudwatch:GetMetricStatistics",
               ],
               "Effect": "Allow",
               "Resource": "*",
