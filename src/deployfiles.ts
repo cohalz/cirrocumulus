@@ -6,8 +6,6 @@ import { BucketDeployment, Source } from "@aws-cdk/aws-s3-deployment"
 import { CfnAssociation, CfnDocument } from "@aws-cdk/aws-ssm"
 import { Aws, Construct } from "@aws-cdk/core"
 
-import * as path from "path"
-
 export interface DeployFilesProps {
   /**
    * The Local directory to deploy to instance
@@ -91,7 +89,7 @@ export class DeployFiles extends Construct {
     return new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: this.bucket,
       destinationKeyPrefix: s3Prefix,
-      source: Source.asset(source),
+      sources: [Source.asset(source)],
     })
   }
 
