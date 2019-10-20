@@ -3,33 +3,33 @@
 exports[`ec2cluster default 1`] = `
 Object {
   "Parameters": Object {
-    "BucketDeploymentAssetArtifactHash57B6FAC2": Object {
-      "Description": "Artifact hash for asset \\"BucketDeployment/Asset\\"",
+    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430ArtifactHash55E30580": Object {
+      "Description": "Artifact hash for asset \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
       "Type": "String",
     },
-    "BucketDeploymentAssetS3Bucket5FB20E3B": Object {
-      "Description": "S3 bucket for asset \\"BucketDeployment/Asset\\"",
+    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3Bucket13DFEC6A": Object {
+      "Description": "S3 bucket for asset \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
       "Type": "String",
     },
-    "BucketDeploymentAssetS3VersionKey0CD87795": Object {
-      "Description": "S3 key for asset version \\"BucketDeployment/Asset\\"",
+    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC": Object {
+      "Description": "S3 key for asset version \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
       "Type": "String",
     },
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeArtifactHashEF37AD24": Object {
-      "Description": "Artifact hash for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+    "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32ArtifactHash9ACDC225": Object {
+      "Description": "Artifact hash for asset \\"8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32\\"",
       "Type": "String",
     },
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7": Object {
-      "Description": "S3 bucket for asset \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+    "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3BucketF507ADDB": Object {
+      "Description": "S3 bucket for asset \\"8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32\\"",
       "Type": "String",
     },
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0": Object {
-      "Description": "S3 key for asset version \\"Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code\\"",
+    "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3VersionKeyA9E86E29": Object {
+      "Description": "S3 key for asset version \\"8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32\\"",
       "Type": "String",
     },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
       "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id",
-      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
   },
   "Resources": Object {
@@ -233,17 +233,7 @@ def pick(dct, *keys):
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "lambda.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "lambda.amazonaws.com",
               },
             },
           ],
@@ -261,6 +251,12 @@ def pick(dct, *keys):
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
           },
         ],
       },
@@ -422,6 +418,12 @@ def pick(dct, *keys):
             ],
           },
         ],
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -505,7 +507,6 @@ def pick(dct, *keys):
             "IpProtocol": "-1",
           },
         ],
-        "SecurityGroupIngress": Array [],
         "Tags": Array [
           Object {
             "Key": "Name",
@@ -694,22 +695,18 @@ aws ec2 create-tags --region ",
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "autoscaling.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "autoscaling.amazonaws.com",
               },
             },
           ],
           "Version": "2012-10-17",
         },
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -751,42 +748,46 @@ aws ec2 create-tags --region ",
             "Arn",
           ],
         },
-        "SourceBucketName": Object {
-          "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
-        },
-        "SourceObjectKey": Object {
-          "Fn::Join": Array [
-            "",
-            Array [
-              Object {
-                "Fn::Select": Array [
-                  0,
-                  Object {
-                    "Fn::Split": Array [
-                      "||",
-                      Object {
-                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
-                      },
-                    ],
-                  },
-                ],
-              },
-              Object {
-                "Fn::Select": Array [
-                  1,
-                  Object {
-                    "Fn::Split": Array [
-                      "||",
-                      Object {
-                        "Ref": "BucketDeploymentAssetS3VersionKey0CD87795",
-                      },
-                    ],
-                  },
-                ],
-              },
+        "SourceBucketNames": Array [
+          Object {
+            "Ref": "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3BucketF507ADDB",
+          },
+        ],
+        "SourceObjectKeys": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                Object {
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3VersionKeyA9E86E29",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                Object {
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3VersionKeyA9E86E29",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
             ],
-          ],
-        },
+          },
+        ],
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",
@@ -865,17 +866,7 @@ aws ec2 create-tags --region ",
               "Action": "s3:GetBucketAcl",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "cloudtrail.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "cloudtrail.amazonaws.com",
               },
               "Resource": Object {
                 "Fn::GetAtt": Array [
@@ -893,17 +884,7 @@ aws ec2 create-tags --region ",
               },
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "cloudtrail.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "cloudtrail.amazonaws.com",
               },
               "Resource": Object {
                 "Fn::Join": Array [
@@ -938,7 +919,7 @@ aws ec2 create-tags --region ",
       "Properties": Object {
         "Code": Object {
           "S3Bucket": Object {
-            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3Bucket6E5FB2B7",
+            "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3Bucket13DFEC6A",
           },
           "S3Key": Object {
             "Fn::Join": Array [
@@ -951,7 +932,7 @@ aws ec2 create-tags --region ",
                       "Fn::Split": Array [
                         "||",
                         Object {
-                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                          "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC",
                         },
                       ],
                     },
@@ -964,7 +945,7 @@ aws ec2 create-tags --region ",
                       "Fn::Split": Array [
                         "||",
                         Object {
-                          "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CCodeS3VersionKey426156C0",
+                          "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC",
                         },
                       ],
                     },
@@ -994,17 +975,7 @@ aws ec2 create-tags --region ",
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "lambda.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "lambda.amazonaws.com",
               },
             },
           ],
@@ -1049,7 +1020,7 @@ aws ec2 create-tags --region ",
                       },
                       ":s3:::",
                       Object {
-                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                        "Ref": "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3BucketF507ADDB",
                       },
                     ],
                   ],
@@ -1064,7 +1035,7 @@ aws ec2 create-tags --region ",
                       },
                       ":s3:::",
                       Object {
-                        "Ref": "BucketDeploymentAssetS3Bucket5FB20E3B",
+                        "Ref": "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3BucketF507ADDB",
                       },
                       "/*",
                     ],
@@ -1186,17 +1157,7 @@ aws ec2 create-tags --region ",
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "events.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "events.amazonaws.com",
               },
             },
           ],
@@ -1298,7 +1259,9 @@ aws ec2 create-tags --region ",
                 ],
               ],
             },
-            "Id": "--Token-TOKEN.229--",
+            "Id": Object {
+              "Ref": "DeployCommands",
+            },
             "RoleArn": Object {
               "Fn::GetAtt": Array [
                 "EventRoleForAutoDeploy7E0815A5",
