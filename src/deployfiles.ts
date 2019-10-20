@@ -91,7 +91,7 @@ export class DeployFiles extends Construct {
     return new BucketDeployment(scope, "BucketDeployment", {
       destinationBucket: this.bucket,
       destinationKeyPrefix: s3Prefix,
-      source: Source.asset(source),
+      sources: [Source.asset(source)],
     })
   }
 
