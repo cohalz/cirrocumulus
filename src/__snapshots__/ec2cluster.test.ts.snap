@@ -17,7 +17,6 @@ Object {
         },
       },
       "Properties": Object {
-        "DesiredCapacity": "1",
         "MaxSize": "1",
         "MinSize": "1",
         "MixedInstancesPolicy": Object {
@@ -678,6 +677,14 @@ aws ec2 create-tags --region ",
       "Type": "AWS::IAM::Policy",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
     },
     "Ec2Cluster796ACAF5": Object {
@@ -865,6 +872,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet1EIP6AD938E8": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -963,6 +976,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet2EIP4947BC00": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -1075,7 +1094,6 @@ Object {
         },
       },
       "Properties": Object {
-        "DesiredCapacity": "1",
         "LaunchTemplate": Object {
           "LaunchTemplateId": Object {
             "Ref": "AutoScalingGroupLaunchTemplate",
@@ -1731,6 +1749,14 @@ echo ECS_CLUSTER=",
       "Type": "AWS::IAM::Policy",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
     },
     "Ec2Cluster796ACAF5": Object {
@@ -1918,6 +1944,12 @@ echo ECS_CLUSTER=",
     "VPCPublicSubnet1EIP6AD938E8": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -2016,6 +2048,12 @@ echo ECS_CLUSTER=",
     "VPCPublicSubnet2EIP4947BC00": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -2128,7 +2166,6 @@ Object {
         },
       },
       "Properties": Object {
-        "DesiredCapacity": "1",
         "LaunchTemplate": Object {
           "LaunchTemplateId": Object {
             "Ref": "AutoScalingGroupLaunchTemplate",
@@ -2798,6 +2835,14 @@ aws ec2 create-tags --region ",
       "Type": "AWS::IAM::Policy",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
     },
     "Ec2Cluster796ACAF5": Object {
@@ -2985,6 +3030,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet1EIP6AD938E8": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -3083,6 +3134,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet2EIP4947BC00": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -3195,7 +3252,6 @@ Object {
         },
       },
       "Properties": Object {
-        "DesiredCapacity": "1",
         "LaunchTemplate": Object {
           "LaunchTemplateId": Object {
             "Ref": "AutoScalingGroupLaunchTemplate",
@@ -3841,6 +3897,14 @@ aws ec2 create-tags --region ",
       "Type": "AWS::IAM::Policy",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
     },
     "Ec2Cluster796ACAF5": Object {
@@ -4028,6 +4092,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet1EIP6AD938E8": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -4126,6 +4196,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet2EIP4947BC00": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },

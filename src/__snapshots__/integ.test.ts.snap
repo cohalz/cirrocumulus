@@ -3,18 +3,6 @@
 exports[`ec2cluster default 1`] = `
 Object {
   "Parameters": Object {
-    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430ArtifactHash55E30580": Object {
-      "Description": "Artifact hash for asset \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
-      "Type": "String",
-    },
-    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3Bucket13DFEC6A": Object {
-      "Description": "S3 bucket for asset \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
-      "Type": "String",
-    },
-    "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC": Object {
-      "Description": "S3 key for asset version \\"6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430\\"",
-      "Type": "String",
-    },
     "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32ArtifactHash9ACDC225": Object {
       "Description": "Artifact hash for asset \\"8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32\\"",
       "Type": "String",
@@ -25,6 +13,18 @@ Object {
     },
     "AssetParameters8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32S3VersionKeyA9E86E29": Object {
       "Description": "S3 key for asset version \\"8245913f4edd4e58e4630bcf5b6138ab75d368e2a8c54115ba043776501d3f32\\"",
+      "Type": "String",
+    },
+    "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffArtifactHash08605F5E": Object {
+      "Description": "Artifact hash for asset \\"a9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ff\\"",
+      "Type": "String",
+    },
+    "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffS3Bucket848A1F31": Object {
+      "Description": "S3 bucket for asset \\"a9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ff\\"",
+      "Type": "String",
+    },
+    "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffS3VersionKey983DBE96": Object {
+      "Description": "S3 key for asset version \\"a9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ff\\"",
       "Type": "String",
     },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": Object {
@@ -59,7 +59,6 @@ Object {
         },
       },
       "Properties": Object {
-        "DesiredCapacity": "1",
         "LaunchTemplate": Object {
           "LaunchTemplateId": Object {
             "Ref": "AutoScalingGroupLaunchTemplate",
@@ -734,6 +733,14 @@ aws ec2 create-tags --region ",
       "Type": "AWS::IAM::Policy",
     },
     "AutoScalingGroupLifecycleHookDrainHookTopicDAD927DC": Object {
+      "Properties": Object {
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "AutoScalingGroup",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
     },
     "BucketDeploymentCustomResourceCB7E2133": Object {
@@ -919,7 +926,7 @@ aws ec2 create-tags --region ",
       "Properties": Object {
         "Code": Object {
           "S3Bucket": Object {
-            "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3Bucket13DFEC6A",
+            "Ref": "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffS3Bucket848A1F31",
           },
           "S3Key": Object {
             "Fn::Join": Array [
@@ -932,7 +939,7 @@ aws ec2 create-tags --region ",
                       "Fn::Split": Array [
                         "||",
                         Object {
-                          "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC",
+                          "Ref": "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffS3VersionKey983DBE96",
                         },
                       ],
                     },
@@ -945,7 +952,7 @@ aws ec2 create-tags --region ",
                       "Fn::Split": Array [
                         "||",
                         Object {
-                          "Ref": "AssetParameters6416c21be320b522db64c705872c0a54d788e3df57b34a5f0d1e8602d7521430S3VersionKeyED938FBC",
+                          "Ref": "AssetParametersa9125fa9a40550c71cde90bd478cc23091e868067a12380c1df0827d013ad2ffS3VersionKey983DBE96",
                         },
                       ],
                     },
@@ -1467,6 +1474,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet1EIP6AD938E8": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet1",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
@@ -1565,6 +1578,12 @@ aws ec2 create-tags --region ",
     "VPCPublicSubnet2EIP4947BC00": Object {
       "Properties": Object {
         "Domain": "vpc",
+        "Tags": Array [
+          Object {
+            "Key": "Name",
+            "Value": "VPC/PublicSubnet2",
+          },
+        ],
       },
       "Type": "AWS::EC2::EIP",
     },
