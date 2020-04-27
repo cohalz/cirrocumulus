@@ -2,6 +2,7 @@ import {
   IMachineImage,
   MachineImageConfig,
   OperatingSystemType,
+  UserData
 } from "@aws-cdk/aws-ec2"
 import { Construct } from "@aws-cdk/core"
 
@@ -11,6 +12,7 @@ export class ImportedImage implements IMachineImage {
     return {
       imageId: this.amiId,
       osType: OperatingSystemType.LINUX,
+      userData: UserData.forLinux(),
     }
   }
 }
